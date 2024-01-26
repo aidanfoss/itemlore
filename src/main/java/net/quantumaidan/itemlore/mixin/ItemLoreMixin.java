@@ -27,8 +27,7 @@ import java.util.Date;
 
 @Mixin(AnvilScreenHandler.class)
 abstract class ItemLoreMixin extends ForgingScreenHandler {
-    @Shadow private @Nullable String newItemName;
-
+    //@Shadow private @Nullable String newItemName;
     public ItemLoreMixin(@Nullable ScreenHandlerType<?> type, int syncId, PlayerInventory playerInventory, ScreenHandlerContext context) {
         super(type, syncId, playerInventory, context);
     }
