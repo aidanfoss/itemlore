@@ -4,8 +4,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.text.Style;
 import net.minecraft.util.Formatting;
-import net.minecraft.item.ItemUsage;
-import net.minecraft.item.Items;
+//import net.minecraft.item.ItemUsage;
+//import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
@@ -31,13 +31,13 @@ public class ItemLorePlacer{
     Date today = Calendar.getInstance().getTime();
     String reportDate = df.format(today);
     public final DefaultedList<Slot> slots = DefaultedList.of();
-    private String newItemName;
+    //private String newItemName;
     public static final Logger LOGGER = LoggerFactory.getLogger(ItemLore.MOD_ID);
     public Slot getSlot(int index) {
         return this.slots.get(index);
     }
     @Inject(method = "setNewItemName", at = @At("HEAD"))
-    private void injectMethod(String newItemName){
+    private void injectMethod(){
         LOGGER.info("Injected = True"); //what
         if (this.getSlot(2).hasStack()) {
             LOGGER.info("hasStack = true");
