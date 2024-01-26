@@ -38,17 +38,14 @@ abstract class ItemLoreMixin extends ForgingScreenHandler {
 
     @Inject(at = @At("TAIL"), method = "updateResult")
     private void init(CallbackInfo info) {
-        String playerName = String.valueOf(player.getName());
-        StringUtils.removeStart(playerName, "literal{");
-        StringUtils.removeEnd(playerName, "}");
-        // This code is injected into the start of MinecraftServer.loadWorld()V
         ItemStack itemStack = this.output.getStack(3);
 
         NbtList lore = itemStack.getOrCreateSubNbt("display").getList("Lore", NbtElement.STRING_TYPE);
         if (lore.isEmpty()) {
             lore.add(NbtString.of(Text.Serializer.toJson(Text.empty().append(reportDate).setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)))));
-            //lore.add(NbtString.of(Text.Serializer.toJson(Text.empty().append("\n").setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)))));
-            lore.add(NbtString.of(Text.Serializer.toJson(Text.empty().append("UID: " + playerName).setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)))));
+            lore.add(NbtString.of(Text.Serializer.toJson(Text.literal("UID: ").append(this.player.getDisplayName()).setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)))));
+            //lore.add((NbtString) Text.literal("UID: ").append(String.valueOf(player.getName())).setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)));
+
             itemStack.getOrCreateSubNbt("display").put("Lore", lore);
         }
     }
