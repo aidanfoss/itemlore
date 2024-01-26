@@ -12,10 +12,8 @@ import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -27,7 +25,6 @@ import java.util.Date;
 
 @Mixin(AnvilScreenHandler.class)
 abstract class ItemLoreMixin extends ForgingScreenHandler {
-    //@Shadow private @Nullable String newItemName;
     public ItemLoreMixin(@Nullable ScreenHandlerType<?> type, int syncId, PlayerInventory playerInventory, ScreenHandlerContext context) {
         super(type, syncId, playerInventory, context);
     }
@@ -44,8 +41,6 @@ abstract class ItemLoreMixin extends ForgingScreenHandler {
         if (lore.isEmpty()) {
             lore.add(NbtString.of(Text.Serializer.toJson(Text.empty().append(reportDate).setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)))));
             lore.add(NbtString.of(Text.Serializer.toJson(Text.literal("UID: ").append(this.player.getDisplayName()).setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)))));
-            //lore.add((NbtString) Text.literal("UID: ").append(String.valueOf(player.getName())).setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)));
-
             itemStack.getOrCreateSubNbt("display").put("Lore", lore);
         }
     }
