@@ -38,7 +38,7 @@ public class ItemLorePlacer{
     }
     @Inject(method = "setNewItemName", at = @At("HEAD"))
     private void injectMethod(String newItemName){
-        LOGGER.info("Injected = True");
+        LOGGER.info("Injected = True"); //what
         if (this.getSlot(2).hasStack()) {
             LOGGER.info("hasStack = true");
             ItemStack itemStack = this.getSlot(2).getStack();
