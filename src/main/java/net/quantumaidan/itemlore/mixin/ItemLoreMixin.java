@@ -1,5 +1,6 @@
 package net.quantumaidan.itemlore.mixin;
 
+import io.netty.util.internal.StringUtil;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtElement;
@@ -13,6 +14,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -42,6 +44,8 @@ abstract class ItemLoreMixin extends ForgingScreenHandler {
     @Inject(at = @At("TAIL"), method = "updateResult")
     private void init(CallbackInfo info) {
         String playerName = String.valueOf(player.getName());
+        StringUtils.removeStart(playerName, "literal{");
+        StringUtils.removeEnd(playerName, "}");
         // This code is injected into the start of MinecraftServer.loadWorld()V
         ItemStack itemStack = this.output.getStack(3);
 
@@ -49,7 +53,7 @@ abstract class ItemLoreMixin extends ForgingScreenHandler {
         if (lore.isEmpty()) {
             lore.add(NbtString.of(Text.Serializer.toJson(Text.empty().append(reportDate).setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)))));
             //lore.add(NbtString.of(Text.Serializer.toJson(Text.empty().append("\n").setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)))));
-            lore.add(NbtString.of(Text.Serializer.toJson(Text.empty().append("UID: " + player.getName()).setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)))));
+            lore.add(NbtString.of(Text.Serializer.toJson(Text.empty().append("UID: " + playerName).setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)))));
             itemStack.getOrCreateSubNbt("display").put("Lore", lore);
         }
     }
