@@ -1,6 +1,11 @@
 package net.quantumaidan.itemlore.mixin;
 
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
+//import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.ForgingScreenHandler;
+import net.minecraft.screen.ScreenHandlerContext;
+import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.text.Text;
 import net.minecraft.text.Style;
 import net.minecraft.util.Formatting;
@@ -13,6 +18,7 @@ import net.minecraft.screen.AnvilScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.collection.DefaultedList;
 import net.quantumaidan.itemlore.ItemLore;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.Mixin;
@@ -24,18 +30,21 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-@Mixin(AnvilScreenHandler.class)
+import static net.quantumaidan.itemlore.ItemLore.LOGGER;
 
-public class ItemLorePlacer{
+@Mixin(AnvilScreenHandler.class)
+abstract class ItemLoreMixin extends ForgingScreenHandler{
     DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
     Date today = Calendar.getInstance().getTime();
     String reportDate = df.format(today);
     public final DefaultedList<Slot> slots = DefaultedList.of();
-    //private String newItemName;
-    public static final Logger LOGGER = LoggerFactory.getLogger(ItemLore.MOD_ID);
-    public Slot getSlot(int index) {
-        return this.slots.get(index);
+
+    public ItemLoreMixin(@Nullable ScreenHandlerType<?> type, int syncId, PlayerInventory playerInventory, ScreenHandlerContext context) {
+        super(type, syncId, playerInventory, context);
     }
+    //private String newItemName;
+
+
     @Inject(method = "setNewItemName", at = @At("HEAD"))
     private void injectMethod(){
         LOGGER.info("Injected = True"); //what
