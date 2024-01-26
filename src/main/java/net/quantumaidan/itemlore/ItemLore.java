@@ -2,7 +2,7 @@ package net.quantumaidan.itemlore;
 
 import net.fabricmc.api.ModInitializer;
 
-import net.quantumaidan.itemlore.item.ModItems;
+//import net.quantumaidan.itemlore.item.ModItems;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,8 +12,7 @@ public class ItemLore implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		LOGGER.info("Hello Fabric world!");
+		LOGGER.info("ItemLore Initialized");
 
-		ModItems.registerModItems();
 	}
 }
