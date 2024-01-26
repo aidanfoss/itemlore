@@ -38,12 +38,13 @@ public class ItemLorePlacer{
     }
     @Inject(method = "setNewItemName", at = @At("HEAD"))
     private void injectMethod(String newItemName){
+        LOGGER.info("Injected = True");
         if (this.getSlot(2).hasStack()) {
             LOGGER.info("hasStack = true");
             ItemStack itemStack = this.getSlot(2).getStack();
 
             NbtList lore = itemStack.getOrCreateSubNbt("display").getList("Lore", NbtElement.STRING_TYPE);
-            lore.add(NbtString.of(Text.Serializer.toJson(Text.empty().append(reportDate).setStyle(Style.EMPTY.withColor(Formatting.GRAY)))));
+            lore.add(NbtString.of(Text.Serializer.toJson(Text.empty().append(reportDate).setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)))));
             itemStack.getOrCreateSubNbt("display").put("Lore", lore);
         }
     }
