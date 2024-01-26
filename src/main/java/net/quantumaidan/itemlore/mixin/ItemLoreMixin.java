@@ -1,6 +1,5 @@
 package net.quantumaidan.itemlore.mixin;
 
-import io.netty.util.internal.StringUtil;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtElement;
@@ -10,7 +9,6 @@ import net.minecraft.screen.AnvilScreenHandler;
 import net.minecraft.screen.ForgingScreenHandler;
 import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.ScreenHandlerType;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -26,8 +24,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-
-import static net.quantumaidan.itemlore.ItemLore.LOGGER;
 
 @Mixin(AnvilScreenHandler.class)
 abstract class ItemLoreMixin extends ForgingScreenHandler {
