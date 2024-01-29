@@ -29,7 +29,7 @@ abstract class ItemLoreMixin extends ForgingScreenHandler {
         super(type, syncId, playerInventory, context);
     }
 
-    DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
+    DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm");
     Date today = Calendar.getInstance().getTime();
     String reportDate = df.format(today);
 
