@@ -1,7 +1,7 @@
 {
 	"schemaVersion": 1,
 	"id": "itemlore",
-	"version": "${version}",
+	"version": "0.2",
 	"name": "ItemLore",
 	"description": "Adds Date and CST Time, as well as UID in the lore of anvilled items",
 	"authors": [
@@ -30,7 +30,7 @@
 	],
 	"depends": {
 		"fabricloader": ">=0.15.2",
-		"minecraft": "~1.20.2",
+		"minecraft": "~1.20.x",
 		"java": ">=17",
 		"fabric-api": "*"
 	},
