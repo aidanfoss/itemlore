@@ -8,8 +8,8 @@
 		"quantumaidan"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"homepage": "https://github.com/aidanfoss/itemlore-1.20.2/tree/master/src/main/java/net/quantumaidan/itemlore",
+		"sources": "https://github.com/aidanfoss/itemlore-1.20.2/tree/master/src/main/java/net/quantumaidan/itemlore"
 	},
 	"license": "CC0-1.0",
 	"icon": "assets/itemlore/icon.png",
