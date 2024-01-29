@@ -3,7 +3,7 @@
 	"id": "itemlore",
 	"version": "0.2",
 	"name": "ItemLore",
-	"description": "Adds Date and CST Time, as well as UID in the lore of anvilled items",
+	"description": "Adds Date and Time, as well as UID in the lore of anvilled items",
 	"authors": [
 		"quantumaidan"
 	],
@@ -11,7 +11,7 @@
 		"homepage": "https://github.com/aidanfoss/itemlore-1.20.2/tree/master/src/main/java/net/quantumaidan/itemlore ",
 		"sources": "https://github.com/aidanfoss/itemlore-1.20.2/tree/master/src/main/java/net/quantumaidan/itemlore"
 	},
-	"license": "CC0-1.0",
+	"license": "MIT License",
 	"icon": "assets/itemlore/icon.png",
 	"environment": "*",
 	"entrypoints": {
