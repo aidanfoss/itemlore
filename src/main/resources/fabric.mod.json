@@ -1,7 +1,7 @@
 {
 	"schemaVersion": 1,
 	"id": "itemlore",
-	"version": "0.2",
+	"version": "${version}",
 	"name": "ItemLore",
 	"description": "Adds Date and Time, as well as UID in the NBT Lore tag of anvilled items",
 	"authors": [
@@ -20,9 +20,6 @@
 		],
 		"client": [
 			"net.quantumaidan.itemlore.ItemLoreClient"
-		],
-		"fabric-datagen": [
-			"net.quantumaidan.itemlore.ItemLoreDataGenerator"
 		]
 	},
 	"mixins": [
