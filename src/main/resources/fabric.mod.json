@@ -3,7 +3,7 @@
 	"id": "itemlore",
 	"version": "0.2",
 	"name": "ItemLore",
-	"description": "Adds Date and Time, as well as UID in the lore of anvilled items",
+	"description": "Adds Date and Time, as well as UID in the NBT Lore tag of anvilled items",
 	"authors": [
 		"quantumaidan"
 	],
