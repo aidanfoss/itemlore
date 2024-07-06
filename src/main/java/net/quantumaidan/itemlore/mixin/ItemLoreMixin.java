@@ -1,10 +1,11 @@
 package net.quantumaidan.itemlore.mixin;
 
+import net.fabricmc.loader.impl.util.log.Log;
+import net.fabricmc.loader.impl.util.log.LogCategory;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.LoreComponent;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
 import net.minecraft.screen.AnvilScreenHandler;
 import net.minecraft.screen.ForgingScreenHandler;
 import net.minecraft.screen.ScreenHandlerContext;
@@ -14,14 +15,16 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
+import java.util.*;
+
+import static net.quantumaidan.itemlore.util.setLore.setLore;
 
 @Mixin(AnvilScreenHandler.class)
 abstract class ItemLoreMixin extends ForgingScreenHandler {
@@ -29,19 +32,33 @@ abstract class ItemLoreMixin extends ForgingScreenHandler {
         super(type, syncId, playerInventory, context);
     }
 
+    @Unique
     DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm");
+    @Unique
     Date today = Calendar.getInstance().getTime();
+    @Unique
     String reportDate = df.format(today);
 
     @Inject(at = @At("TAIL"), method = "updateResult")
     private void init(CallbackInfo info) {
         ItemStack itemStack = this.output.getStack(3);
 
-        NbtList lore = itemStack.getOrCreateSubNbt("display").getList("Lore", NbtElement.STRING_TYPE);
-        if (lore.isEmpty()) {
-            lore.add(NbtString.of(Text.Serializer.toJson(Text.empty().append(reportDate).setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)))));
-            lore.add(NbtString.of(Text.Serializer.toJson(Text.literal("UID: ").append(this.player.getDisplayName()).setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)))));
-            itemStack.getOrCreateSubNbt("display").put("Lore", lore);
+        LoreComponent lore = itemStack.get(DataComponentTypes.LORE);
+
+        Log.debug(LogCategory.LOG,"before the if statement");
+        if ((lore != null) && (lore.lines().isEmpty())) {
+
+            Text dateLore = Text.of(reportDate);
+            Text nameLore = Text.literal("UID: ").append(this.player.getDisplayName());
+
+            setLore(itemStack, 1, dateLore);
+            setLore(itemStack,2,nameLore);
+
         }
     }
 }
+
+
+//lore.lines().set(1,Text.empty().append(reportDate).setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)));
+//Objects.requireNonNull(itemStack.get(DataComponentTypes.LORE)).lines().set(1,Text.empty().append(reportDate));
+//lore.lines().set(2,Text.literal("UID: ").append(this.player.getDisplayName()).setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)));
