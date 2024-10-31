@@ -29,18 +29,20 @@ abstract class ItemLoreMixin extends ForgingScreenHandler {
         super(type, syncId, playerInventory, context);
     }
 
+    //Create a string called reportDate that is formatted like MM/dd/yyyy HH:mm
     DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm");
     Date today = Calendar.getInstance().getTime();
     String reportDate = df.format(today);
 
-    @Inject(at = @At("TAIL"), method = "updateResult")
+    
+    @Inject(at = @At("TAIL"), method = "updateResult") //inject at the end of the function that updates the output of the anvil itemstack. In other words, edit the code that edits the item
     private void init(CallbackInfo info) {
-        ItemStack itemStack = this.output.getStack(3);
+        ItemStack itemStack = this.output.getStack(3); //define itemStack as the output of the anvil
 
         NbtList lore = itemStack.getOrCreateSubNbt("display").getList("Lore", NbtElement.STRING_TYPE);
-        if (lore.isEmpty()) {
-            lore.add(NbtString.of(Text.Serializer.toJson(Text.empty().append(reportDate).setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)))));
-            lore.add(NbtString.of(Text.Serializer.toJson(Text.literal("UID: ").append(this.player.getDisplayName()).setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)))));
+        if (lore.isEmpty()) { //if the item has no lore
+            lore.add(NbtString.of(Text.Serializer.toJson(Text.empty().append(reportDate).setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE))))); //add the date and time
+            lore.add(NbtString.of(Text.Serializer.toJson(Text.literal("UID: ").append(this.player.getDisplayName()).setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE))))); //add the UID of the player
             itemStack.getOrCreateSubNbt("display").put("Lore", lore);
         }
     }
