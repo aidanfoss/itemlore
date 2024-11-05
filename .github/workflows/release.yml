@@ -11,15 +11,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    env:
-      MINECRAFT_VERSION: ${{ steps.read_properties.outputs.minecraft_version }}
-      JAVA_VERSION: 21
-      VERSION: ${{ steps.read_properties.outputs.mod_version }}
-      RELEASE_NAME: ${{ steps.read_properties.outputs.archives_base_name }}
-      MODRINTH_TOKEN: ${{ secrets.PUBLISH_MODRINTH_TOKEN }}
-      CURSEFORGE_TOKEN: ${{ secrets.PUBLISH_CURSEFORGE_TOKEN }}
-      GITHUB_TOKEN: ${{ secrets.PUBLISH_GITHUB_TOKEN }}
-
     permissions:
       contents: write
 
@@ -74,19 +65,15 @@ jobs:
         uses: Kir-Antipov/mc-publish@v3.2
         with:
           curseforge-id: 123456
-          curseforge-token: "${{env.CURSEFORGE_TOKEN}}"
-
+          curseforge-token: "${{ secrets.PUBLISH_CURSEFORGE_TOKEN }}"
           modrinth-id: 1q2w3e4r
-          modrinth-token: "${{env.MODRINTH_TOKEN}}"
-
-          github-tag: "v${{env.VERSION}}"
-          github-token: "${{env.GITHUB_TOKEN}}"
-
-          name: "${{env.RELEASE_NAME}}"
-          version: "${{env.VERSION}}"
+          modrinth-token: "${{ secrets.PUBLISH_MODRINTH_TOKEN }}"
+          github-tag: "v${{ steps.read_properties.outputs.mod_version }}"
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+          name: "${{ steps.read_properties.outputs.archives_base_name }}"
+          version: "${{ steps.read_properties.outputs.mod_version }}"
           version-type: release
           changelog-file: CHANGELOG.md
-
           loaders: fabric
-          game-versions: "${{env.MINECRAFT_VERSION}}"
-          java: "${{env.JAVA_VERSION}}"
+          game-versions: "${{ steps.read_properties.outputs.minecraft_version }}"
+          java: "21"
