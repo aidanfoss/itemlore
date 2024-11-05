@@ -1,3 +1,7 @@
-### TODO
+### LINKS
 
-1: Show how this code works. Explain it line by line, so future updates can be done
+https://curseforge.com/minecraft/mc-mods/itemlore
+
+https://github.com/aidanfoss/itemlore
+
+https://modrinth.com/mod/itemlore
