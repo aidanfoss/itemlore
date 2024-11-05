@@ -21,6 +21,9 @@
 		"client": [
 			"net.quantumaidan.itemLore.ItemLoreClient"
 		],
+		"modmenu": [
+			"net.quantumaidan.itemLore.config.itemLoreModMenuIntegration"
+		],
 		"server": [],
 		"fabric-datagen": [],
 		"fabric-gametest": [],

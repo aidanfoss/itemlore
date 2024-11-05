@@ -22,7 +22,7 @@ public class itemLoreConfigScreen {
                 .addEntry(entryBuilder
                         .startBooleanToggle(Text.of("Enable ItemLore"), config.getEnabled())
                         .setDefaultValue(true) // default value
-                        .setTooltip(Text.of("Enable or disable ItemLore"))
+                        .setTooltip(Text.of("Enable or disable ItemLore (SINGLEPLAYER ONLY)"))
                         .setSaveConsumer(config::setEnabled) // save value to config
                         .build());
 
