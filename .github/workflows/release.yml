@@ -73,12 +73,42 @@ jobs:
       - name: Publish (CurseForge/Modrinth/GitHub)
         uses: Kir-Antipov/mc-publish@v3.3.0
         with:
-          curseforge-id: itemlore
-          curseforge-token: "${{ secrets.PUBLISH_CURSEFORGE_TOKEN }}"
+          #curseforge-id: itemlore
+          #curseforge-token: "${{ secrets.PUBLISH_CURSEFORGE_TOKEN }}"
           modrinth-id: itemlore
           modrinth-token: "${{ secrets.PUBLISH_MODRINTH_TOKEN }}"
+          #github-tag: "v${{ steps.read_properties.outputs.mod_version }}"
+          #github-token: "${{ secrets.GITHUB_TOKEN }}"
+          name: "${{ steps.read_properties.outputs.archives_base_name }}"
+          version: "${{ steps.read_properties.outputs.mod_version }}"
+          version-type: release
+          changelog-file: CHANGELOG.md
+          loaders: fabric
+          game-versions: "${{ steps.read_properties.outputs.minecraft_version }}"
+          java: "21"
+
+      - name: Publish (GitHub)
+        uses: Kir-Antipov/mc-publish@v3.3.0
+        with:
+          #curseforge-id: itemlore
+          #curseforge-token: "${{ secrets.PUBLISH_CURSEFORGE_TOKEN }}"
+          #modrinth-id: itemlore
+          #modrinth-token: "${{ secrets.PUBLISH_MODRINTH_TOKEN }}"
           github-tag: "v${{ steps.read_properties.outputs.mod_version }}"
           github-token: "${{ secrets.GITHUB_TOKEN }}"
+          name: "${{ steps.read_properties.outputs.archives_base_name }}"
+          version: "${{ steps.read_properties.outputs.mod_version }}"
+          version-type: release
+          changelog-file: CHANGELOG.md
+          loaders: fabric
+          game-versions: "${{ steps.read_properties.outputs.minecraft_version }}"
+          java: "21"
+
+      - name: Publish Curseforge
+        uses: Kir-Antipov/mc-publish@v3.3.0
+        with:
+          curseforge-id: itemlore
+          curseforge-token: "${{ secrets.PUBLISH_CURSEFORGE_TOKEN }}"
           name: "${{ steps.read_properties.outputs.archives_base_name }}"
           version: "${{ steps.read_properties.outputs.mod_version }}"
           version-type: release
