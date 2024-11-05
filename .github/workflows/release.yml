@@ -56,6 +56,9 @@ jobs:
         with:
           distribution: "temurin"
           java-version: 21
+          
+      - name: Set Gradle Java Home
+        run: echo "org.gradle.java.home=${{ env.JAVA_HOME_21_X64 }}" >> gradle.properties
 
       - name: Make Gradle Wrapper Executable
         if: runner.os != 'Windows'
