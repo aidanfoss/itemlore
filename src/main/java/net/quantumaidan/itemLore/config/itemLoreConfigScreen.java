@@ -18,26 +18,25 @@ public class itemLoreConfigScreen {
 
         ConfigEntryBuilder entryBuilder = builder.entryBuilder();
 
-        BooleanListEntry enabled = entryBuilder
-                .startBooleanToggle(Text.literal("Force Join"), config.getEnabled())
-                .setTooltip(Text.literal("Whether ItemLore should apply to anvilled items or not"))
-                .build();
+        builder.getOrCreateCategory(Text.of("General"))
+                .addEntry(entryBuilder
+                        .startBooleanToggle(Text.of("Enable ItemLore"), config.getEnabled())
+                        .setDefaultValue(true) // default value
+                        .setTooltip(Text.of("Enable or disable ItemLore"))
+                        .setSaveConsumer(config::setEnabled) // save value to config
+                        .build());
 
-        StringListEntry dateTimeFormatConfig = entryBuilder
-                .startStrField(Text.literal("DateTime Format"), config.getDateTimeFormatConfig())
-                .setTooltip(Text.literal("uses SimpleDateFormat (ex 'HH:mm' will do military time, 'hh:mm a' will do AM/PM"))
-                .build();
+        // String field option
+        builder.getOrCreateCategory(Text.of("General"))
+                .addEntry(entryBuilder
+                        .startStrField(Text.of("Date Time Format"), config.getDateTimeFormatConfig())
+                        .setDefaultValue("HH:mm") // default value
+                        .setTooltip(Text.of("Format for date and time in item lore"))
+                        .setSaveConsumer(config::setDateTimeFormatConfig) // save value to config
+                        .build());
 
-        ConfigCategory general = builder.getOrCreateCategory(Text.literal("General"));
-        general.addEntry(enabled);
-        general.addEntry(dateTimeFormatConfig);
 
-
-        builder.setSavingRunnable(() -> {
-            config.setEnabled(enabled.getValue());
-            config.setDateTimeFormatConfig(dateTimeFormatConfig.getValue());
-
-        });
+        builder.setSavingRunnable(config::saveConfig);
 
         return builder.build();
     }

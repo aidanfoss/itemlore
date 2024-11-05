@@ -3,6 +3,7 @@ package net.quantumaidan.itemLore.config;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.fabricmc.loader.api.FabricLoader;
+import net.quantumaidan.itemLore.ItemLore;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -15,9 +16,12 @@ public class itemLoreConfig {
 
     public static final itemLoreConfig loadConfig() {
         Path path = FabricLoader.getInstance().getConfigDir().resolve("itemLore.json");
+        ItemLore.LOGGER.info("beginning itemLore config read");
 
         if (!Files.exists(path)) {
-            return initConfig();
+            itemLoreConfig temp = initConfig();
+            temp.saveConfig();
+            return temp;
         }
         BufferedReader br;
         try {
@@ -29,9 +33,10 @@ public class itemLoreConfig {
             config.enabled = json.get("enabled").getAsBoolean();
             config.dateTimeFormatConfig = json.get("dateTimeFormatConfig").getAsString();
 
+            ItemLore.LOGGER.info("itemLore config successfully read!");
             return config;
         } catch (IOException e) {
-            e.printStackTrace();
+            ItemLore.LOGGER.error("config failed to read");
         }
         return new itemLoreConfig();
     }
@@ -46,8 +51,9 @@ public class itemLoreConfig {
 
         try (BufferedWriter bw = Files.newBufferedWriter(path)) {
             bw.write(configJson.toString());
+            ItemLore.LOGGER.info("itemLore config read");
         } catch (IOException e) {
-            e.printStackTrace();
+            ItemLore.LOGGER.error("config failed to save");
         }
     }
 
@@ -55,7 +61,7 @@ public class itemLoreConfig {
     private String dateTimeFormatConfig;
 
     private static itemLoreConfig initConfig(){
-        return new itemLoreConfig(true, "MM:dd:yyyy hh:mm a");
+        return new itemLoreConfig(true, "MM/dd/yyyy hh:mm a");
     }
 
     public itemLoreConfig(boolean inp, String dateTimeFormatConfig) {
