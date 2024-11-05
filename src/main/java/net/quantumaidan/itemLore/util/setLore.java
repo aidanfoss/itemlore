@@ -18,6 +18,7 @@ import java.util.List;
 
 public class setLore {
     public static boolean applyNewLore(PlayerEntity player, ItemStack itemStack) {
+        itemLoreConfig config = itemLoreConfig.loadConfig();
         DateFormat df = new SimpleDateFormat(itemLoreConfig.loadConfig().getDateTimeFormatConfig());
         Date today = Calendar.getInstance().getTime();
         String reportDate = df.format(today);
@@ -26,7 +27,7 @@ public class setLore {
         if (inputLore == null) {
             inputLore = new LoreComponent(List.of());//fix null issue
         }
-        if (inputLore.equals(new LoreComponent(List.of()))) {
+        if (inputLore.equals(new LoreComponent(List.of())) && config.getEnabled()) {
             //4. Create the new LoreComponent that will be applied to the itemStack
             LoreComponent newLoreComponent = new LoreComponent(List.of(Text.literal(reportDate).setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)), Text.literal("UID: ").append(player.getDisplayName()).setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE))));
 

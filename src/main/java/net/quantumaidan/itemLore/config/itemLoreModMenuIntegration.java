@@ -9,7 +9,7 @@ import net.quantumaidan.itemLore.config.itemLoreConfigScreen;
 public class itemLoreModMenuIntegration implements ModMenuApi {
     @Override
     public ConfigScreenFactory<?> getModConfigScreenFactory() {
-        ItemLore.LOGGER.info("ItemLore ConfigScreenFactory Called------------------------");
+        //ItemLore.LOGGER.info("ItemLore ConfigScreenFactory Called------------------------");
         return parent -> new itemLoreConfigScreen().createScreen(parent);
     }
 }

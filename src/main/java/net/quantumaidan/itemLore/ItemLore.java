@@ -75,8 +75,10 @@ public class ItemLore implements ModInitializer {
 			dispatcher.register(CommandManager.literal("toggleItemLore")
 					.requires(source -> source.hasPermissionLevel(2))
 					.executes(context -> {
+						itemLoreConfig.loadConfig();
 						config.setEnabled(!config.getEnabled());
-						context.getSource().getPlayer().sendMessage(Text.literal(("ItemLore Toggle set to: ") + Text.literal("%s".formatted(config.getEnabled()))));
+						config.saveConfig();
+						context.getSource().getPlayer().sendMessage(Text.literal(("ItemLore Toggle set to: ") + Text.literal(String.valueOf(config.getEnabled()))));
 						return 0;
 					}));
 		});
