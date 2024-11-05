@@ -30,7 +30,7 @@ public class itemLoreConfigScreen {
         builder.getOrCreateCategory(Text.of("General"))
                 .addEntry(entryBuilder
                         .startStrField(Text.of("Date Time Format"), config.getDateTimeFormatConfig())
-                        .setDefaultValue("HH:mm") // default value
+                        .setDefaultValue("MM/dd/yyyy hh:mm a") // default value
                         .setTooltip(Text.of("Format for date and time in item lore"))
                         .setSaveConsumer(config::setDateTimeFormatConfig) // save value to config
                         .build());
