@@ -2,6 +2,8 @@ name: Build and Publish
 
 on:
   pull_request:
+    branches:
+      - main
   workflow_dispatch:
   push:
     tags:
@@ -10,15 +12,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
-    env:
-      MINECRAFT_VERSION: ${{ steps.read_properties.outputs.minecraft_version }}
-      JAVA_VERSION: 21
-      VERSION: ${{ steps.read_properties.outputs.mod_version }}
-      RELEASE_NAME: ${{ steps.read_properties.outputs.archives_base_name }}
-      MODRINTH_TOKEN: ${{ secrets.PUBLISH_MODRINTH_TOKEN }}
-      CURSEFORGE_TOKEN: ${{ secrets.PUBLISH_CURSEFORGE_TOKEN }}
-      GITHUB_TOKEN: ${{ secrets.PUBLISH_GITHUB_TOKEN }}
 
     permissions:
       contents: write
@@ -33,7 +26,8 @@ jobs:
         id: read_properties
         uses: BrycensRanch/read-properties-action@v1.0.4
         with:
-          path: gradle.properties
+          file: gradle.properties
+          all: true
           properties: |
             minecraft_version
             yarn_mappings
@@ -62,31 +56,63 @@ jobs:
         with:
           distribution: "temurin"
           java-version: 21
+          
+      - name: Confirm Java Version
+        run: java -version
 
+      - name: Set JAVA_HOME
+        run: echo "JAVA_HOME=${{ env.JAVA_HOME_21_X64 }}" >> $GITHUB_ENV
+      
       - name: Make Gradle Wrapper Executable
-        if: ${{ runner.os != 'Windows' }}
+        if: runner.os != 'Windows'
         run: chmod +x ./gradlew
 
       - name: Build
         run: ./gradlew clean build
 
       - name: Publish (CurseForge/Modrinth/GitHub)
-        uses: Kir-Antipov/mc-publish@v3.2
+        uses: Kir-Antipov/mc-publish@v3.3.0
         with:
-          curseforge-id: 123456
-          curseforge-token: "${{env.CURSEFORGE_TOKEN}}"
-
-          modrinth-id: 1q2w3e4r
-          modrinth-token: "${{env.MODRINTH_TOKEN}}"
-
-          github-tag: "v${{env.VERSION}}"
-          github-token: "${{env.GITHUB_TOKEN}}"
-
-          name: "${{env.RELEASE_NAME}}"
-          version: "${{env.VERSION}}"
+          #curseforge-id: itemlore
+          #curseforge-token: "${{ secrets.PUBLISH_CURSEFORGE_TOKEN }}"
+          modrinth-id: itemlore
+          modrinth-token: "${{ secrets.PUBLISH_MODRINTH_TOKEN }}"
+          #github-tag: "v${{ steps.read_properties.outputs.mod_version }}"
+          #github-token: "${{ secrets.GITHUB_TOKEN }}"
+          name: "${{ steps.read_properties.outputs.archives_base_name }}"
+          version: "${{ steps.read_properties.outputs.mod_version }}"
           version-type: release
           changelog-file: CHANGELOG.md
-
           loaders: fabric
-          game-versions: "${{env.MINECRAFT_VERSION}}"
-          java: "${{env.JAVA_VERSION}}"
+          game-versions: "${{ steps.read_properties.outputs.minecraft_version }}"
+          java: "21"
+
+      - name: Publish (GitHub)
+        uses: Kir-Antipov/mc-publish@v3.3.0
+        with:
+          #curseforge-id: itemlore
+          #curseforge-token: "${{ secrets.PUBLISH_CURSEFORGE_TOKEN }}"
+          #modrinth-id: itemlore
+          #modrinth-token: "${{ secrets.PUBLISH_MODRINTH_TOKEN }}"
+          github-tag: "v${{ steps.read_properties.outputs.mod_version }}"
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+          name: "${{ steps.read_properties.outputs.archives_base_name }}"
+          version: "${{ steps.read_properties.outputs.mod_version }}"
+          version-type: release
+          changelog-file: CHANGELOG.md
+          loaders: fabric
+          game-versions: "${{ steps.read_properties.outputs.minecraft_version }}"
+          java: "21"
+
+      - name: Publish Curseforge
+        uses: Kir-Antipov/mc-publish@v3.3.0
+        with:
+          curseforge-id: itemlore
+          curseforge-token: "${{ secrets.PUBLISH_CURSEFORGE_TOKEN }}"
+          name: "${{ steps.read_properties.outputs.archives_base_name }}"
+          version: "${{ steps.read_properties.outputs.mod_version }}"
+          version-type: release
+          changelog-file: CHANGELOG.md
+          loaders: fabric
+          game-versions: "${{ steps.read_properties.outputs.minecraft_version }}"
+          java: "21"
