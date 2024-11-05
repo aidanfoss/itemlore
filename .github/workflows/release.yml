@@ -2,6 +2,8 @@ name: Build and Publish
 
 on:
   pull_request:
+    branches:
+      - main
   workflow_dispatch:
   push:
     tags:
@@ -55,7 +57,7 @@ jobs:
           java-version: 21
 
       - name: Make Gradle Wrapper Executable
-        if: ${{ runner.os != 'Windows' }}
+        if: runner.os != 'Windows'
         run: chmod +x ./gradlew
 
       - name: Build
@@ -64,9 +66,9 @@ jobs:
       - name: Publish (CurseForge/Modrinth/GitHub)
         uses: Kir-Antipov/mc-publish@v3.2
         with:
-          curseforge-id: 123456
+          curseforge-id: quantumaidan
           curseforge-token: "${{ secrets.PUBLISH_CURSEFORGE_TOKEN }}"
-          modrinth-id: 1q2w3e4r
+          modrinth-id: aidanfoss
           modrinth-token: "${{ secrets.PUBLISH_MODRINTH_TOKEN }}"
           github-tag: "v${{ steps.read_properties.outputs.mod_version }}"
           github-token: "${{ secrets.GITHUB_TOKEN }}"
