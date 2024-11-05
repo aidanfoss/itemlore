@@ -26,7 +26,7 @@ jobs:
         id: read_properties
         uses: BrycensRanch/read-properties-action@v1.0.4
         with:
-          path: gradle.properties
+          file: gradle.properties
           properties: |
             minecraft_version
             yarn_mappings
