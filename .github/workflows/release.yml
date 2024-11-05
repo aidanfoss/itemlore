@@ -27,6 +27,7 @@ jobs:
         uses: BrycensRanch/read-properties-action@v1.0.4
         with:
           file: gradle.properties
+          all: true
           properties: |
             minecraft_version
             yarn_mappings
