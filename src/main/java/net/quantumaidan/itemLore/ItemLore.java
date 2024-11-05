@@ -7,6 +7,7 @@ import net.minecraft.component.type.LoreComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.text.Text;
+import net.quantumaidan.itemLore.config.itemLoreConfig;
 import net.quantumaidan.itemLore.util.setLore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,8 +21,9 @@ public class ItemLore implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		LOGGER.info("ItemLore Initialized");
+		itemLoreConfig config = itemLoreConfig.loadConfig();
 
+		LOGGER.info(MOD_ID + " Initialized");
 
 		//ApplyLore Command
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {

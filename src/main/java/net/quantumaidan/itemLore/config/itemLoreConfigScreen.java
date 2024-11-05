@@ -1,4 +1,4 @@
-package net.quantumaidan.itemLore.util;
+package net.quantumaidan.itemLore.config;
 
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
@@ -19,12 +19,12 @@ public class itemLoreConfigScreen {
         ConfigEntryBuilder entryBuilder = builder.entryBuilder();
 
         BooleanListEntry enabled = entryBuilder
-                .startBooleanToggle(Text.literal("Force Join"), config.enabled())
+                .startBooleanToggle(Text.literal("Force Join"), config.getEnabled())
                 .setTooltip(Text.literal("Whether ItemLore should apply to anvilled items or not"))
                 .build();
 
         StringListEntry dateTimeFormatConfig = entryBuilder
-                .startStrField(Text.literal("DateTime Format"), config.dateTimeFormatConfig())
+                .startStrField(Text.literal("DateTime Format"), config.getDateTimeFormatConfig())
                 .setTooltip(Text.literal("uses SimpleDateFormat (ex 'HH:mm' will do military time, 'hh:mm a' will do AM/PM"))
                 .build();
 

@@ -1,4 +1,4 @@
-package net.quantumaidan.itemLore.util;
+package net.quantumaidan.itemLore.config;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -17,7 +17,7 @@ public class itemLoreConfig {
         Path path = FabricLoader.getInstance().getConfigDir().resolve("itemLore.json");
 
         if (!Files.exists(path)) {
-            return new itemLoreConfig();
+            return initConfig();
         }
         BufferedReader br;
         try {
@@ -54,14 +54,16 @@ public class itemLoreConfig {
     private boolean enabled;
     private String dateTimeFormatConfig;
 
-    public itemLoreConfig() {}
-
-    public itemLoreConfig(
-            boolean enabled
-    )
-    {
-        this.enabled = true;
+    private static itemLoreConfig initConfig(){
+        return new itemLoreConfig(true, "MM:dd:yyyy hh:mm a");
     }
+
+    public itemLoreConfig(boolean inp, String dateTimeFormatConfig) {
+        this.enabled = inp;
+        this.dateTimeFormatConfig = dateTimeFormatConfig;
+    }
+
+    public itemLoreConfig(){}
 
     public boolean getEnabled(){
         return enabled;
