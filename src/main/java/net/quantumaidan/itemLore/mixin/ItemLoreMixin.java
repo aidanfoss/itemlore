@@ -11,6 +11,7 @@ import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.screen.slot.ForgingSlotsManager;
 import net.minecraft.text.Text;
+import net.quantumaidan.itemLore.util.setLore;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -25,6 +26,8 @@ import java.util.Date;
 import java.util.List;
 
 
+
+
 @Mixin(AnvilScreenHandler.class)
 public abstract class ItemLoreMixin extends ForgingScreenHandler {
     public ItemLoreMixin(@Nullable ScreenHandlerType<?> type, int syncId, PlayerInventory playerInventory, ScreenHandlerContext context, ForgingSlotsManager forgingSlotsManager) {
@@ -33,7 +36,7 @@ public abstract class ItemLoreMixin extends ForgingScreenHandler {
 
     @Inject(at = @At("TAIL"), method = "onTakeOutput")
     private void init(PlayerEntity player, ItemStack itemStack, CallbackInfo ci) {
-        applyLore(player, itemStack);
+        setLore.applyNewLore(player, itemStack);
     }
 
 
@@ -44,7 +47,7 @@ public abstract class ItemLoreMixin extends ForgingScreenHandler {
         ItemStack itemStack = this.output.getStack(3);
 
         //3. attempt to setLore on given itemStack
-        applyLore(player, itemStack);
+        setLore.applyNewLore(player, itemStack);
     }
 
     @Unique
