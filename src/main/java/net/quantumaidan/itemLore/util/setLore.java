@@ -17,16 +17,15 @@ import java.util.List;
 
 public class setLore {
     public static boolean applyNewLore(PlayerEntity player, ItemStack itemStack) {
-        DateFormat df = new SimpleDateFormat(itemLoreConfig.getDTF());
+        DateFormat df = new SimpleDateFormat(itemLoreConfig.loadConfig().getDateTimeFormatConfig());
         Date today = Calendar.getInstance().getTime();
         String reportDate = df.format(today);
-        //If the passed item doesn't have any lore, or has lore, but it's for some reason empty, then apply the datetime+UID lore tag
-//        if (itemStack.get(DataComponentTypes.LORE) == null|!Objects.requireNonNull(itemStack.get(DataComponentTypes.LORE)).toString().contains("UID: ")){
-//            itemStack.set(DataComponentTypes.LORE, new LoreComponent(List.of(Text.literal(reportDate), Text.literal("UID: ").append(player.getDisplayName()))));
-//            return true;
-//        }
+
         LoreComponent inputLore = itemStack.get(DataComponentTypes.LORE);
-        if (inputLore.equals(new LoreComponent(List.of()))){
+        if (inputLore == null) {
+            inputLore = new LoreComponent(List.of());//fix null issue
+        }
+        if (inputLore.equals(new LoreComponent(List.of()))) {
             //4. Create the new LoreComponent that will be applied to the itemStack
             LoreComponent newLoreComponent = new LoreComponent(List.of(Text.literal(reportDate).setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)), Text.literal("UID: ").append(player.getDisplayName()).setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE))));
 
@@ -35,10 +34,6 @@ public class setLore {
 
             return true;
         }
-//        else if (((itemStack.get(DataComponentTypes.LORE))).toString().contains("UID: ")){
-//            LoreComponent newLoreComponent = new LoreComponent(List.of(Text.literal(reportDate), Text.literal("UID: ").append(player.getDisplayName())));
-//            itemStack.set(DataComponentTypes.LORE, newLoreComponent);
-//        }
         return false;
     }
 }
