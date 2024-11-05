@@ -1,4 +1,4 @@
-package net.quantumaidan.itemlore.mixin;
+package net.quantumaidan.itemLore.mixin;
 
 import net.fabricmc.loader.impl.util.log.Log;
 import net.fabricmc.loader.impl.util.log.LogCategory;
@@ -24,7 +24,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static net.quantumaidan.itemlore.util.setLore.setLore;
+import static net.quantumaidan.itemLore.util.setLore.setLore;
 
 @Mixin(AnvilScreenHandler.class)
 abstract class ItemLoreMixin extends ForgingScreenHandler {

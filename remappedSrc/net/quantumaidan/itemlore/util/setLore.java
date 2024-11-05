@@ -1,4 +1,4 @@
-package net.quantumaidan.itemlore.util;
+package net.quantumaidan.itemLore.util;
 
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.LoreComponent;

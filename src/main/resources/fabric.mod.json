@@ -16,14 +16,14 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"net.quantumaidan.itemlore.ItemLore"
+			"net.quantumaidan.itemLore.ItemLore"
 		],
 		"client": [
-			"net.quantumaidan.itemlore.ItemLoreClient"
+			"net.quantumaidan.itemLore.ItemLoreClient"
 		]
 	},
 	"mixins": [
-		"itemlore.mixins.json"
+		"itemLore.mixins.json"
 	],
 	"depends": {
 		"fabricloader": ">=0.16.7",
