@@ -1,3 +1,1 @@
-Added /toggleItemLore for server owners
-
-implemented clothconfig and modmenu for clientside/singleplayer
+updated dependencies and minecraft version
