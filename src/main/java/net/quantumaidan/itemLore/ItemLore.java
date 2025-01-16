@@ -7,7 +7,6 @@ import net.minecraft.component.type.LoreComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.text.Text;
-import net.quantumaidan.itemLore.config.itemLoreConfig;
 import net.quantumaidan.itemLore.util.setLore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +22,6 @@ public class ItemLore implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		itemLoreConfig config = itemLoreConfig.loadConfig();
 
 		LOGGER.info(MOD_ID + " Initialized");
 
@@ -67,18 +65,6 @@ public class ItemLore implements ModInitializer {
 						LoreComponent loreComponent = new LoreComponent(List.of());
 						context.getSource().getPlayer().sendMessage(Text.literal(stack.get(DataComponentTypes.LORE).toString()));
 						context.getSource().getPlayer().sendMessage(Text.literal(loreComponent.toString()));
-						return 0;
-					}));
-		});
-
-		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-			dispatcher.register(CommandManager.literal("toggleItemLore")
-					.requires(source -> source.hasPermissionLevel(2))
-					.executes(context -> {
-						itemLoreConfig.loadConfig();
-						config.setEnabled(!config.getEnabled());
-						config.saveConfig();
-						context.getSource().getPlayer().sendMessage(Text.literal(("ItemLore Toggle set to: ") + Text.literal(String.valueOf(config.getEnabled()))));
 						return 0;
 					}));
 		});
