@@ -1,3 +1,1 @@
-Added /toggleItemLore for server owners
-
-implemented clothconfig and modmenu for clientside/singleplayer
+fixed mixin reference, mod should work as intended now.
