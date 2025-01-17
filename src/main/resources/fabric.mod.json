@@ -32,8 +32,15 @@
 	"mixins": [
 		"itemLore.mixins.json"
 	],
+	"custom": {
+		"mixin": {
+			"config": "itemLore.mixins.json",
+			"refmap": "itemLore-refmap.json",
+			"debug": true
+		}
+	},
 	"depends": {
-		"fabricloader": ">=0.16.9",
+		"fabricloader": ">=0.16.10",
 		"minecraft": "~1.21.4",
 		"java": ">=21",
 		"fabric-api": "*",
