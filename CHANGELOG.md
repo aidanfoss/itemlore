@@ -1,1 +1,1 @@
-updated dependencies and minecraft version
+fixed mixin reference, mod should work as intended now.
