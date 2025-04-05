@@ -22,7 +22,11 @@ public class setLore {
 
         // Use the static config field from MidnightLib
         DateFormat df = new SimpleDateFormat(itemLoreConfig.dateTimeFormatConfig);
-        df.setTimeZone(TimeZone.getTimeZone(itemLoreConfig.timeZone));
+        TimeZone tz = TimeZone.getTimeZone(itemLoreConfig.timeZone);
+        if (tz.getID().equals("GMT") && !itemLoreConfig.timeZone.equalsIgnoreCase("GMT")) {
+            tz = TimeZone.getTimeZone("UTC"); // fallback if user enters garbage
+        }
+        df.setTimeZone(tz);
 
         Date today = Calendar.getInstance().getTime();
         String reportDate = df.format(today);
