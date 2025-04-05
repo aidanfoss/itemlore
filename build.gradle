@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.9-SNAPSHOT'
+	id 'fabric-loom' version '1.10-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -20,6 +20,7 @@ repositories {
 	maven { url "https://maven.shedaniel.me/" }
 	maven { url "https://maven.terraformersmc.com/releases/" }
 	maven { url "https://maven.terraformersmc.com/" }
+	maven {url = "https://api.modrinth.com/maven"}
 }
 
 fabricApi {
@@ -36,9 +37,7 @@ dependencies {
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 	
 	//Modmenu and Config options
-	modApi("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}") {
-		exclude(group: "net.fabricmc.fabric-api")
-	}
+	modImplementation include ("maven.modrinth:midnightlib:${project.midnightlib_version}")
 
 	modImplementation("com.terraformersmc:modmenu:${project.modmenu_version}")
 }
