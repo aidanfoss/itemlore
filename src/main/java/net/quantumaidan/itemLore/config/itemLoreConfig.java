@@ -9,9 +9,9 @@ public class itemLoreConfig extends MidnightConfig {
     @Comment(name = "Defaults if input is nonsense", centered = true) public static String comment1;
     @Comment(name = "Formatting Information on Modrinth", centered = true) public static String comment2;
 
-    @Entry(name = "DateTimeFormat")
+    @Entry(name = "Date Time")
     public static String dateTimeFormatConfig = "MM/dd/yyyy hh:mm a";
 
-    @Entry
+    @Entry(name = "Time Zone")
     public static String timeZone = "CST";
 }
