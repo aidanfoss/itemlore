@@ -7,6 +7,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.quantumaidan.itemLore.ItemLore;
 import net.quantumaidan.itemLore.config.itemLoreConfig;
 
 import java.text.DateFormat;
@@ -20,16 +21,28 @@ public class setLore {
     public static boolean applyNewLore(PlayerEntity player, ItemStack itemStack) {
         if (!itemLoreConfig.enabled) return false;
 
-        // Use the static config field from MidnightLib
-        DateFormat df = new SimpleDateFormat(itemLoreConfig.dateTimeFormatConfig);
+        // Safe time zone handling
         TimeZone tz = TimeZone.getTimeZone(itemLoreConfig.timeZone);
         if (tz.getID().equals("GMT") && !itemLoreConfig.timeZone.equalsIgnoreCase("GMT")) {
-            tz = TimeZone.getTimeZone("UTC"); // fallback if user enters garbage
+            tz = TimeZone.getTimeZone("UTC");
+            ItemLore.LOGGER.warn("[ItemLore] Invalid time zone '{}', defaulting to UTC", itemLoreConfig.timeZone);
         }
-        df.setTimeZone(tz);
 
-        Date today = Calendar.getInstance().getTime();
-        String reportDate = df.format(today);
+        // Safe date format handling
+        String reportDate = "";
+        try {
+            DateFormat df = new SimpleDateFormat(itemLoreConfig.dateTimeFormatConfig);
+            df.setTimeZone(tz);
+            reportDate = df.format(new Date());
+
+            if (reportDate.equals(itemLoreConfig.dateTimeFormatConfig)
+                    || reportDate.matches("[AP]M?[0-9APM]*")) {
+                throw new IllegalArgumentException("Formatted date is likely nonsense");
+            }
+        } catch (IllegalArgumentException e) {
+            reportDate = "Invalid Date Format";
+            ItemLore.LOGGER.warn("[ItemLore] Invalid date format '{}', using fallback text", itemLoreConfig.dateTimeFormatConfig);
+        }
 
         LoreComponent inputLore = itemStack.get(DataComponentTypes.LORE);
         if (inputLore == null || inputLore.lines() == null || inputLore.lines().isEmpty()) {
@@ -41,6 +54,7 @@ public class setLore {
             itemStack.set(DataComponentTypes.LORE, newLoreComponent);
             return true;
         }
+
 
         return false;
     }
