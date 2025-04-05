@@ -19,49 +19,31 @@ import java.util.TimeZone;
 
 public class setLore {
 
-    private static DateFormat cachedDateFormat = null;
-    private static TimeZone cachedTimeZone = null;
-    private static boolean hasLoggedFormatError = false;
-    private static boolean hasLoggedZoneError = false;
-
     public static boolean applyNewLore(PlayerEntity player, ItemStack itemStack) {
         if (!itemLoreConfig.enabled) return false;
 
-        // Set up timezone once
-        if (cachedTimeZone == null) {
-            TimeZone tz = TimeZone.getTimeZone(itemLoreConfig.timeZone);
-            if (tz.getID().equals("GMT") && !itemLoreConfig.timeZone.equalsIgnoreCase("GMT")) {
-                tz = TimeZone.getTimeZone("UTC");
-                if (!hasLoggedZoneError) {
-                    ItemLore.LOGGER.warn("[ItemLore] Invalid time zone '{}', defaulting to UTC", itemLoreConfig.timeZone);
-                    hasLoggedZoneError = true;
-                }
-            }
-            cachedTimeZone = tz;
+        // Safe time zone handling
+        TimeZone tz = TimeZone.getTimeZone(itemLoreConfig.timeZone);
+        if (tz.getID().equals("GMT") && !itemLoreConfig.timeZone.equalsIgnoreCase("GMT")) {
+            tz = TimeZone.getTimeZone("UTC");
+            ItemLore.LOGGER.warn("[ItemLore] Invalid time zone '{}', defaulting to UTC", itemLoreConfig.timeZone);
         }
 
-        // Set up date format once
-        if (cachedDateFormat == null) {
-            try {
-                SimpleDateFormat df = new SimpleDateFormat(itemLoreConfig.dateTimeFormatConfig);
-                df.setTimeZone(cachedTimeZone);
-                String preview = df.format(new Date());
-                if (preview.equals(itemLoreConfig.dateTimeFormatConfig) || preview.matches("[AP]M?[0-9APM]*")) {
-                    throw new IllegalArgumentException("Garbage-looking output");
-                }
-                cachedDateFormat = df;
-            } catch (IllegalArgumentException e) {
-                if (!hasLoggedFormatError) {
-                    ItemLore.LOGGER.warn("[ItemLore] Invalid date format '{}', using fallback", itemLoreConfig.dateTimeFormatConfig);
-                    hasLoggedFormatError = true;
-                }
-                SimpleDateFormat fallback = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-                fallback.setTimeZone(cachedTimeZone);
-                cachedDateFormat = fallback;
+        // Safe date format handling
+        String reportDate = "";
+        try {
+            DateFormat df = new SimpleDateFormat(itemLoreConfig.dateTimeFormatConfig);
+            df.setTimeZone(tz);
+            reportDate = df.format(new Date());
+
+            if (reportDate.equals(itemLoreConfig.dateTimeFormatConfig)
+                    || reportDate.matches("[AP]M?[0-9APM]*")) {
+                throw new IllegalArgumentException("Formatted date is likely nonsense");
             }
+        } catch (IllegalArgumentException e) {
+            reportDate = "Invalid Date Format";
+            ItemLore.LOGGER.warn("[ItemLore] Invalid date format '{}', using fallback text", itemLoreConfig.dateTimeFormatConfig);
         }
-        // Format the date using cached, validated formatter
-        String reportDate = cachedDateFormat.format(new Date());
 
         LoreComponent inputLore = itemStack.get(DataComponentTypes.LORE);
         if (inputLore == null || inputLore.lines() == null || inputLore.lines().isEmpty()) {
@@ -76,13 +58,5 @@ public class setLore {
 
 
         return false;
-    }
-
-    public static boolean reloadConfig() {
-        cachedDateFormat = null;
-        cachedTimeZone = null;
-        hasLoggedZoneError = false;
-        hasLoggedFormatError = false;
-        return true;
     }
 }
