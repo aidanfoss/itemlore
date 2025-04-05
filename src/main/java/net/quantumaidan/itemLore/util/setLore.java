@@ -23,7 +23,6 @@ public class setLore {
     private static TimeZone cachedTimeZone = null;
     private static boolean hasLoggedFormatError = false;
     private static boolean hasLoggedZoneError = false;
-    private static itemLoreConfig cachedConfig = null;
 
     public static boolean applyNewLore(PlayerEntity player, ItemStack itemStack) {
         if (!itemLoreConfig.enabled) return false;
