@@ -2,14 +2,11 @@ package net.quantumaidan.itemLore.config;
 
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;
-import net.quantumaidan.itemLore.ItemLore;
-import net.quantumaidan.itemLore.config.itemLoreConfigScreen;
-
+import eu.midnightdust.lib.config.MidnightConfig;
 
 public class itemLoreModMenuIntegration implements ModMenuApi {
     @Override
     public ConfigScreenFactory<?> getModConfigScreenFactory() {
-        //ItemLore.LOGGER.info("ItemLore ConfigScreenFactory Called------------------------");
-        return parent -> new itemLoreConfigScreen().createScreen(parent);
+        return parent -> MidnightConfig.getScreen(parent, "itemLore");
     }
 }

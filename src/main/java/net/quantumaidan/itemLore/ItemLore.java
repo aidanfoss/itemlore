@@ -1,5 +1,6 @@
 package net.quantumaidan.itemLore;
 
+import eu.midnightdust.lib.config.MidnightConfig;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.component.DataComponentTypes;
@@ -23,7 +24,8 @@ public class ItemLore implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		itemLoreConfig config = itemLoreConfig.loadConfig();
+		MidnightConfig.init("itemLore", itemLoreConfig.class);
+
 
 		LOGGER.info(MOD_ID + " Initialized");
 
@@ -75,10 +77,10 @@ public class ItemLore implements ModInitializer {
 			dispatcher.register(CommandManager.literal("toggleItemLore")
 					.requires(source -> source.hasPermissionLevel(2))
 					.executes(context -> {
-						itemLoreConfig.loadConfig();
-						config.setEnabled(!config.getEnabled());
-						config.saveConfig();
-						context.getSource().getPlayer().sendMessage(Text.literal(("ItemLore Toggle set to: ") + Text.literal(String.valueOf(config.getEnabled()))));
+						itemLoreConfig.enabled = !itemLoreConfig.enabled;
+						Text.literal("ItemLore Toggle set to: " + itemLoreConfig.enabled);
+
+
 						return 0;
 					}));
 		});
