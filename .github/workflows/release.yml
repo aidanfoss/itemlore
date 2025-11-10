@@ -24,18 +24,41 @@ jobs:
 
       - name: Read gradle.properties
         id: read_properties
-        uses: christian-draeger/read-properties@v1
-        with:
-          file: gradle.properties
-          properties: |
-            minecraft_version
-            yarn_mappings
-            loader_version
-            mod_version
-            maven_group
-            archives_base_name
-            fabric_version
-            modmenu_version
+        shell: bash
+        run: |
+          # Keys we want to export
+          keys=(minecraft_version yarn_mappings loader_version mod_version maven_group archives_base_name fabric_version modmenu_version)
+
+          # Ensure file exists
+          if [ ! -f gradle.properties ]; then
+            echo "gradle.properties not found"
+            exit 1
+          fi
+
+          # Read file line-by-line, skip comments and empty lines
+          while IFS= read -r line || [ -n "$line" ]; do
+            # Trim leading/trailing whitespace
+            trimmed="$(echo "$line" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+            # Skip comments and empty lines
+            if [[ -z "$trimmed" || "$trimmed" =~ ^# ]]; then
+              continue
+            fi
+            # Only split on first '=' to allow '=' in value
+            if [[ "$trimmed" != *=* ]]; then
+              continue
+            fi
+            key="${trimmed%%=*}"
+            val="${trimmed#*=}"
+            key="$(echo "$key" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+            val="$(echo "$val" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+
+            for k in "${keys[@]}"; do
+              if [[ "$key" == "$k" ]]; then
+                # Write output so it becomes steps.read_properties.outputs.<key>
+                echo "${k}=${val}" >> "$GITHUB_OUTPUT"
+              fi
+            done
+          done < gradle.properties
 
       - name: Use extracted properties
         run: |
