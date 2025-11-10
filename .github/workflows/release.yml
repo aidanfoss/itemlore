@@ -18,16 +18,15 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: true
 
       - name: Read gradle.properties
         id: read_properties
-        uses: BrycensRanch/read-properties-action@v1.0.4
+        uses: christian-draeger/read-properties@v1
         with:
           file: gradle.properties
-          all: true
           properties: |
             minecraft_version
             yarn_mappings
@@ -36,7 +35,6 @@ jobs:
             maven_group
             archives_base_name
             fabric_version
-            cloth_config_version
             modmenu_version
 
       - name: Use extracted properties
@@ -48,13 +46,12 @@ jobs:
           echo "maven_group: ${{ steps.read_properties.outputs.maven_group }}"
           echo "archives_base_name: ${{ steps.read_properties.outputs.archives_base_name }}"
           echo "fabric_version: ${{ steps.read_properties.outputs.fabric_version }}"
-          echo "cloth_config_version: ${{ steps.read_properties.outputs.cloth_config_version }}"
           echo "modmenu_version: ${{ steps.read_properties.outputs.modmenu_version }}"
 
       - name: Setup Java
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v4
         with:
-          distribution: "temurin"
+          distribution: 'temurin'
           java-version: 21
           
       - name: Confirm Java Version
@@ -67,8 +64,13 @@ jobs:
         if: runner.os != 'Windows'
         run: chmod +x ./gradlew
 
-      - name: Build
+      - name: Build (Linux/macOS)
+        if: runner.os != 'Windows'
         run: ./gradlew clean build
+
+      - name: Build (Windows)
+        if: runner.os == 'Windows'
+        run: .\gradlew.bat clean build
 
       - name: Publish (Modrinth)
         uses: Kir-Antipov/mc-publish@v3.3.0

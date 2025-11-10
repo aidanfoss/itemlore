@@ -21,9 +21,6 @@
 		"client": [
 			"net.quantumaidan.itemLore.ItemLoreClient"
 		],
-		"modmenu": [
-			"net.quantumaidan.itemLore.config.itemLoreModMenuIntegration"
-		],
 		"server": [],
 		"fabric-datagen": [],
 		"fabric-gametest": [],
@@ -41,7 +38,7 @@
 	},
 	"depends": {
 		"fabricloader": ">=0.16.9",
-		"minecraft": "~1.21.4",
+		"minecraft": "~1.21.10",
 		"java": ">=21",
 		"fabric-api": "*",
 		"midnightlib": "*"

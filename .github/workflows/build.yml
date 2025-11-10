@@ -30,11 +30,15 @@ jobs:
       - name: make gradle wrapper executable
         if: ${{ runner.os != 'Windows' }}
         run: chmod +x ./gradlew
-      - name: build
+      - name: build (Linux/macOS)
+        if: runner.os != 'Windows'
         run: ./gradlew build
+      - name: build (Windows)
+        if: runner.os == 'Windows'
+        run: .\gradlew.bat build
       - name: capture build artifacts
         if: ${{ runner.os == 'Linux' && matrix.java == '21' }} # Only upload artifacts built from latest java on one OS
-        uses: actions/upload-artifact@v3.1.2
+        uses: actions/upload-artifact@v4
         with:
           name: Artifacts
           path: build/libs/
