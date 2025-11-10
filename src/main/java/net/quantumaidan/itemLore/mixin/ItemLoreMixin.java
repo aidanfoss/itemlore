@@ -11,34 +11,33 @@ import net.minecraft.screen.slot.ForgingSlotsManager;
 import net.quantumaidan.itemLore.util.setLore;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+
+
+
 @Mixin(AnvilScreenHandler.class)
-public abstract class ItemLoreMixin {
-    @Shadow
-    protected PlayerInventory playerInventory;
-
-    @Shadow
-    protected ForgingSlotsManager input;
-
-    @Shadow
-    protected ForgingSlotsManager output;
+public abstract class ItemLoreMixin extends ForgingScreenHandler {
+    public ItemLoreMixin(@Nullable ScreenHandlerType<?> type, int syncId, PlayerInventory playerInventory, ScreenHandlerContext context, ForgingSlotsManager forgingSlotsManager) {
+        super(type, syncId, playerInventory, context, forgingSlotsManager);
+    }
 
     @Inject(at = @At("TAIL"), method = "onTakeOutput")
     private void init(PlayerEntity player, ItemStack itemStack, CallbackInfo ci) {
         setLore.applyNewLore(player, itemStack);
     }
 
+
+
     @Inject(at = @At("TAIL"), method = "updateResult")
     private void init(CallbackInfo ci) {
         //1. get the itemStack that is the output of the anvil, we need to edit this itemStack to add the lore
-        ItemStack itemStack = this.output.getSlot(0).getStack();
+        ItemStack itemStack = this.output.getStack(0);
 
         //3. attempt to setLore on given itemStack
-        setLore.applyNewLore(this.playerInventory.player, itemStack);
+        setLore.applyNewLore(player, itemStack);
     }
 }
 
