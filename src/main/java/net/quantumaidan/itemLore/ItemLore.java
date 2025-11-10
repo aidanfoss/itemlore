@@ -32,10 +32,13 @@ public class ItemLore implements ModInitializer {
 		//ApplyLore Command
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
 			dispatcher.register(CommandManager.literal("applylore")
-					.requires(source -> source.hasPermissionLevel(2))
 					.executes(context -> {
 						if (context.getSource().getPlayer() == null){ //not a player
 							context.getSource().sendError(Text.literal("Something attempted to run ApplyLore"));
+							return 1;
+						}
+						else if (!itemLoreConfig.enabled){ //feature is disabled
+							context.getSource().getPlayer().sendMessage(Text.literal("ItemLore is currently disabled."), false);
 							return 1;
 						}
 						else if (context.getSource().getPlayer().getMainHandStack() == null){ //player is not holding an item
@@ -78,10 +81,8 @@ public class ItemLore implements ModInitializer {
 					.requires(source -> source.hasPermissionLevel(2))
 					.executes(context -> {
 						itemLoreConfig.enabled = !itemLoreConfig.enabled;
-						Text.literal("ItemLore Toggle set to: " + itemLoreConfig.enabled);
-
-
-						return 0;
+						context.getSource().sendFeedback(() -> Text.literal("ItemLore Toggle set to: " + itemLoreConfig.enabled), false);
+						return 1;
 					}));
 		});
 	}
