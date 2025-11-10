@@ -64,8 +64,13 @@ jobs:
         if: runner.os != 'Windows'
         run: chmod +x ./gradlew
 
-      - name: Build
+      - name: Build (Linux/macOS)
+        if: runner.os != 'Windows'
         run: ./gradlew clean build
+
+      - name: Build (Windows)
+        if: runner.os == 'Windows'
+        run: .\gradlew.bat clean build
 
       - name: Publish (Modrinth)
         uses: Kir-Antipov/mc-publish@v3.3.0
