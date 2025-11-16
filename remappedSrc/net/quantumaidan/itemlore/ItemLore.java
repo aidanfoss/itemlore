@@ -1,4 +1,4 @@
-package net.quantumaidan.itemLore;
+package net.quantumaidan.itemlore;
 
 import net.fabricmc.api.ModInitializer;
 

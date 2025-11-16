@@ -14,4 +14,10 @@ public class itemLoreConfig extends MidnightConfig {
 
     @Entry(name = "Time Zone")
     public static String timeZone = "CST";
+
+    @Entry(name = "Relevant Blocks")
+    public static String relevantBlocks = "Copper,Gold,Iron,Coal,Lapis,Redstone,Emerald,Diamond,Quartz,Stone,Deepslate";
+
+    @Entry(name = "Relevant Mobs")
+    public static String relevantMobs = "Zombie,Creeper,Skeleton,Spider,Enderman";
 }

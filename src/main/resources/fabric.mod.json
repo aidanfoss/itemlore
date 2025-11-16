@@ -12,7 +12,7 @@
 		"sources": "https://github.com/aidanfoss/itemlore"
 	},
 	"license": "MIT License",
-	"icon": "assets/itemLore/icon.png",
+	"icon": "assets/itemlore/icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"main": [
@@ -27,12 +27,12 @@
 		"preLaunch": []
 	},
 	"mixins": [
-		"itemLore.mixins.json"
+		"itemlore.mixins.json"
 	],
 	"custom": {
 		"mixin": {
-			"config": "itemLore.mixins.json",
-			"refmap": "itemLore-refmap.json",
+			"config": "itemlore.mixins.json",
+			"refmap": "itemlore-refmap.json",
 			"debug": true
 		}
 	},
