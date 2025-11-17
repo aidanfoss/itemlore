@@ -5,7 +5,8 @@
 	"mixins": [
 		"ItemLoreMixin",
 		"BlockBreakMixin",
-		"EntityDeathMixin"
+		"EntityDeathMixin",
+		"ArmorDamageMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
