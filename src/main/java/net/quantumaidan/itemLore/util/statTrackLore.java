@@ -1,15 +1,14 @@
 package net.quantumaidan.itemLore.util;
 
-import net.quantumaidan.itemLore.ItemLore;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.LoreComponent;
 import net.minecraft.component.type.NbtComponent;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.*;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
@@ -17,6 +16,8 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.quantumaidan.itemLore.ItemLore;
+
 import java.util.*;
 
 public class statTrackLore {
@@ -40,7 +41,7 @@ public class statTrackLore {
      * @return A map of block types to mined counts.
      */
     public static Map<String, Integer> getMiningStats(ItemStack tool) {
-        if (hasLore(tool)) return Collections.emptyMap();
+        if (!hasLore(tool)) return Collections.emptyMap();
 
         NbtComponent nbt = tool.get(DataComponentTypes.CUSTOM_DATA);
         if (nbt == null) return Collections.emptyMap();
@@ -84,7 +85,7 @@ public class statTrackLore {
      * @return A map of mob types to killed counts.
      */
     public static Map<String, Integer> getKillStats(ItemStack tool) {
-        if (hasLore(tool)) return Collections.emptyMap();
+        if (!hasLore(tool)) return Collections.emptyMap();
 
         NbtComponent nbt = tool.get(DataComponentTypes.CUSTOM_DATA);
         if (nbt == null) return Collections.emptyMap();
@@ -140,7 +141,7 @@ public class statTrackLore {
      * @param tool The tool used to break the block.
      */
     public static void onBlockBrokenWithLoredTool(BlockPos blockPos, BlockState blockState, ItemStack tool) {
-        if (hasLore(tool)) {
+        if (!hasLore(tool)) {
             return;
         }
 
@@ -173,7 +174,7 @@ public class statTrackLore {
      * @param tool The tool used to kill the entity.
      */
     public static void onEntityKilledWithLoredTool(World world, LivingEntity entity, ItemStack tool) {
-        if (hasLore(tool)) {
+        if (!hasLore(tool)) {
             return;
         }
 
