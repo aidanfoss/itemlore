@@ -178,6 +178,7 @@ public class statTrackLore {
             return;
         }
 
+        //TODO fix the /stats all command
         String killKey = Registries.ENTITY_TYPE.getId(entity.getType()).getPath();
         killKey = killKey.substring(0, 1).toUpperCase() + killKey.substring(1); // capitalize
 

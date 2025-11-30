@@ -124,7 +124,7 @@ public class ItemLore implements ModInitializer {
 			return 1;
 		}
 		ItemStack tool = player.getMainHandStack();
-		if (tool.isEmpty() || statTrackLore.hasLore(tool)) {
+		if (tool.isEmpty() || !statTrackLore.hasLore(tool)) {
 			player.sendMessage(Text.literal("You must be holding a tool with lore."), false);
 			return 1;
 		}
