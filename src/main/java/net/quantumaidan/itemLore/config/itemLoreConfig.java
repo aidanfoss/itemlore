@@ -6,8 +6,13 @@ public class itemLoreConfig extends MidnightConfig {
     @Entry(name = "Toggle")
     public static boolean enabled = true;
 
-    @Comment(name = "Defaults if input is nonsense", centered = true) public static String comment1;
-    @Comment(name = "Formatting Information on Modrinth", centered = true) public static String comment2;
+    @Entry(name = "Force Lore")
+    public static boolean forceLore = false;
+
+    @Comment(name = "Defaults if input is nonsense", centered = true)
+    public static String comment1;
+    @Comment(name = "Formatting Information on Modrinth", centered = true)
+    public static String comment2;
 
     @Entry(name = "Date Time")
     public static String dateTimeFormatConfig = "MM/dd/yyyy hh:mm a";
