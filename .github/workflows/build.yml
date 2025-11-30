@@ -20,8 +20,25 @@ jobs:
     steps:
       - name: checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: validate gradle wrapper
         uses: gradle/wrapper-validation-action@v1
+      - name: check changelog
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            DIFF_TARGET="origin/${{ github.base_ref }}"
+          else
+            DIFF_TARGET="HEAD~1"
+          fi
+          
+          if git diff --name-only $DIFF_TARGET | grep -q "CHANGELOG.md"; then
+            echo "CHANGELOG.md has been modified."
+          else
+            echo "Error: CHANGELOG.md was not modified."
+            exit 1
+          fi
       - name: setup jdk ${{ matrix.java }}
         uses: actions/setup-java@v4
         with:

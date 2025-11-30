@@ -3,7 +3,7 @@
 	"id": "itemlore",
 	"version": "${version}",
 	"name": "ItemLore",
-	"description": "Adds Date and Time, as well as UID in the NBT Lore tag of anvilled items",
+	"description": "Adds a Lore Tag and tracks the stats of tools and armor",
 	"authors": [
 		"quantumaidan"
 	],
@@ -38,7 +38,7 @@
 	},
 	"depends": {
 		"fabricloader": ">=0.16.9",
-		"minecraft": "~1.21.10",
+		"minecraft": ">=1.21 <=1.21.10",
 		"java": ">=21",
 		"fabric-api": "*",
 		"midnightlib": "*"
