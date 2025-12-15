@@ -33,12 +33,12 @@ public class BlockBreakMixin {
     }
 
     @Inject(method = "destroyBlock", at = @At("TAIL"))
-    private void afterTryBreakBlock(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
+    private void afterTryBreakBlock(CallbackInfoReturnable<Boolean> cir) {
         if (cir.getReturnValue()) {
             if (net.quantumaidan.itemLore.config.itemLoreConfig.forceLoreMode != net.quantumaidan.itemLore.config.itemLoreConfig.ForceLoreMode.OFF) {
                 net.quantumaidan.itemLore.util.setLore.applyNewLore(this.player, this.player.getMainHandItem());
             }
-            statTrackLore.onBlockBrokenWithLoredTool(pos, this.lastBrokenState, this.player.getMainHandItem());
+            statTrackLore.onBlockBrokenWithLoredTool(this.lastBrokenState, this.player.getMainHandItem());
         }
     }
 }
