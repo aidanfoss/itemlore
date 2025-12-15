@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-//? if >=1.21.11 {
 import net.minecraft.ChatFormatting;
 import net.minecraft.block.BlockState;
 import net.minecraft.core.component.DataComponents;
