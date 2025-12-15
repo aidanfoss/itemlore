@@ -1,30 +1,49 @@
 {
-  "schemaVersion": 1,
-  "id": "${id}",
-  "version": "${version}",
-  "name": "${name}",
-  "description": "This is an example description! Tell everyone what your mod is about!",
-  "authors": [
-    "Me!"
-  ],
-  "contact": {
-    "homepage": "https://stonecutter.kikugie.dev/",
-    "sources": "https://codeberg.org/stonecutter/template-fabric"
-  },
-  "license": "CC0-1.0",
-  "icon": "assets/template/icon.png",
-  "environment": "*",
-  "entrypoints": {
-    "main": [
-      "com.example.TemplateMod"
-    ]
-  },
-  "mixins": [
-    "template.mixins.json"
-  ],
-  "accessWidener": "template.accesswidener",
-  "depends": {
-    "fabricloader": ">=0.17",
-    "minecraft": "${minecraft}"
-  }
+	"schemaVersion": 1,
+	"id": "itemlore",
+	"version": "${version}",
+	"name": "ItemLore",
+	"description": "Adds Date and Time, as well as UID in the NBT Lore tag of anvilled items",
+	"authors": [
+		"quantumaidan"
+	],
+	"contact": {
+		"homepage": "https://github.com/aidanfoss/itemlore",
+		"sources": "https://github.com/aidanfoss/itemlore"
+	},
+	"license": "MIT License",
+	"icon": "assets/itemlore/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"net.quantumaidan.itemLore.ItemLore"
+		],
+		"client": [
+			"net.quantumaidan.itemLore.ItemLoreClient"
+		],
+		"server": [],
+		"fabric-datagen": [],
+		"fabric-gametest": [],
+		"preLaunch": []
+	},
+	"mixins": [
+		"itemlore.mixins.json"
+	],
+	"custom": {
+		"mixin": {
+			"config": "itemlore.mixins.json",
+			"refmap": "itemlore-refmap.json",
+			"debug": true
+		}
+	},
+	"depends": {
+		"fabricloader": ">=0.17",
+		"minecraft": "~${minecraft}",
+		"java": ">=21",
+		"fabric-command-api-v2": "*",
+		"midnightlib": "*"
+	},
+	"suggests": {
+		"modmenu": "*"
+	}
 }
