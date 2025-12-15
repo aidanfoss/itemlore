@@ -1,5 +1,6 @@
 package net.quantumaidan.itemLore;
 
+import java.security.Permissions;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -76,7 +77,7 @@ public class ItemLore implements ModInitializer {
 		// getComponents
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
 			dispatcher.register(CommandManager.literal("getComponents")
-					.requires(source -> source.hasPermissionLevel(2))
+					.requires(source -> Permissions.hasPermission(source, 2))
 					.executes(context -> {
 						ItemStack stack = Objects.requireNonNull(context.getSource().getPlayer()).getMainHandStack();
 						LoreComponent loreComponent = new LoreComponent(List.of());
@@ -102,9 +103,19 @@ public class ItemLore implements ModInitializer {
 			dispatcher.register(CommandManager.literal("toggleForceLore")
 					.requires(source -> source.hasPermissionLevel(2))
 					.executes(context -> {
-						itemLoreConfig.forceLore = !itemLoreConfig.forceLore;
+						switch (itemLoreConfig.forceLoreMode) {
+							case OFF:
+								itemLoreConfig.forceLoreMode = itemLoreConfig.ForceLoreMode.UNSTACKABLE;
+								break;
+							case UNSTACKABLE:
+								itemLoreConfig.forceLoreMode = itemLoreConfig.ForceLoreMode.ALL;
+								break;
+							case ALL:
+								itemLoreConfig.forceLoreMode = itemLoreConfig.ForceLoreMode.OFF;
+								break;
+						}
 						context.getSource().sendFeedback(
-								() -> Text.literal("ForceLore Toggle set to: " + itemLoreConfig.forceLore), false);
+								() -> Text.literal("ForceLore Mode set to: " + itemLoreConfig.forceLoreMode), false);
 						return 1;
 					}));
 		});

@@ -1,5 +1,12 @@
 package net.quantumaidan.itemLore.util;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.component.DataComponentTypes;
@@ -18,12 +25,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.quantumaidan.itemLore.ItemLore;
 
-import java.util.*;
-
 public class statTrackLore {
 
     /**
      * Checks if an ItemStack has lore.
+     * 
      * @param itemStack The item stack to check.
      * @return true if the item has lore, false otherwise.
      */
@@ -41,39 +47,47 @@ public class statTrackLore {
      * @return A map of block types to mined counts.
      */
     public static Map<String, Integer> getMiningStats(ItemStack tool) {
-        if (!hasLore(tool)) return Collections.emptyMap();
+        if (!hasLore(tool))
+            return Collections.emptyMap();
 
         NbtComponent nbt = tool.get(DataComponentTypes.CUSTOM_DATA);
-        if (nbt == null) return Collections.emptyMap();
+        if (nbt == null)
+            return Collections.emptyMap();
 
         NbtCompound customData = nbt.copyNbt();
         Optional<NbtCompound> statsOpt = customData.getCompound("mining_stats");
-        if (statsOpt.isEmpty()) return Collections.emptyMap();
+        if (statsOpt.isEmpty())
+            return Collections.emptyMap();
 
         NbtCompound stats = statsOpt.get();
         Map<String, Integer> result = new HashMap<>();
         for (String key : stats.getKeys()) {
             int val = stats.getInt(key).orElse(0);
-            if (val > 0) result.put(key, val);
+            if (val > 0)
+                result.put(key, val);
         }
         return result;
     }
 
     /**
      * Gets the item type.
+     * 
      * @param item The tool item.
-     * @return The item type: "pickaxe", "axe", "shovel", "hoe", "sword", "bow", or null if not a tool.
+     * @return The item type: "pickaxe", "axe", "shovel", "hoe", "sword", "bow", or
+     *         null if not a tool.
      */
     public static String getItemType(Item item) {
         if (item == null) {
-	    return null;
+            return null;
         }
         Identifier id = Registries.ITEM.getId(item);
         String path = id.getPath();
         String[] parts = path.split("_");
-        if (parts.length == 0) return null;
+        if (parts.length == 0)
+            return null;
         String last = parts[parts.length - 1];
-        if ("pickaxe".equals(last) || "axe".equals(last) || "shovel".equals(last) || "hoe".equals(last) || "sword".equals(last) || "bow".equals(last) || "crossbow".equals(last)) {
+        if ("pickaxe".equals(last) || "axe".equals(last) || "shovel".equals(last) || "hoe".equals(last)
+                || "sword".equals(last) || "bow".equals(last) || "crossbow".equals(last) || "spear".equals(last)) {
             return last;
         }
         return null;
@@ -81,30 +95,36 @@ public class statTrackLore {
 
     /**
      * Gets the kill stats for a tool.
+     * 
      * @param tool The tool item stack.
      * @return A map of mob types to killed counts.
      */
     public static Map<String, Integer> getKillStats(ItemStack tool) {
-        if (!hasLore(tool)) return Collections.emptyMap();
+        if (!hasLore(tool))
+            return Collections.emptyMap();
 
         NbtComponent nbt = tool.get(DataComponentTypes.CUSTOM_DATA);
-        if (nbt == null) return Collections.emptyMap();
+        if (nbt == null)
+            return Collections.emptyMap();
 
         NbtCompound customData = nbt.copyNbt();
         Optional<NbtCompound> statsOpt = customData.getCompound("kill_stats");
-        if (statsOpt.isEmpty()) return Collections.emptyMap();
+        if (statsOpt.isEmpty())
+            return Collections.emptyMap();
 
         NbtCompound stats = statsOpt.get();
         Map<String, Integer> result = new HashMap<>();
         for (String key : stats.getKeys()) {
             int val = stats.getInt(key).orElse(0);
-            if (val > 0) result.put(key, val);
+            if (val > 0)
+                result.put(key, val);
         }
         return result;
     }
 
     /**
      * Checks if an item is a mining tool.
+     * 
      * @param item The tool item.
      * @return true if it's a mining tool.
      */
@@ -115,6 +135,7 @@ public class statTrackLore {
 
     /**
      * Checks if an item is an armor item.
+     * 
      * @param item The item.
      * @return true if it's armor (has armor stats).
      */
@@ -125,20 +146,23 @@ public class statTrackLore {
 
     /**
      * Checks if an item is an attack tool.
+     * 
      * @param item The tool item.
      * @return true if it's an attack tool.
      */
     public static boolean isAttackTool(Item item) {
         String type = getItemType(item);
-        return ("sword".equals(type) || "axe".equals(type) || "bow".equals(type) || "crossbow".equals(type));
+        return ("sword".equals(type) || "axe".equals(type) || "bow".equals(type) || "crossbow".equals(type)
+                || "spear".equals(type));
     }
 
     /**
      * Handles when a block is broken with a tool that has lore.
      * Tracks mining stats and updates the item's lore.
-     * @param blockPos The position of the broken block.
+     * 
+     * @param blockPos   The position of the broken block.
      * @param blockState The state of the broken block.
-     * @param tool The tool used to break the block.
+     * @param tool       The tool used to break the block.
      */
     public static void onBlockBrokenWithLoredTool(BlockPos blockPos, BlockState blockState, ItemStack tool) {
         if (!hasLore(tool)) {
@@ -169,9 +193,10 @@ public class statTrackLore {
     /**
      * Handles when an entity is killed with a tool that has lore.
      * Tracks kill stats and updates the item's lore.
-     * @param world The world where the entity was killed.
+     * 
+     * @param world  The world where the entity was killed.
      * @param entity The entity killed.
-     * @param tool The tool used to kill the entity.
+     * @param tool   The tool used to kill the entity.
      */
     public static void onEntityKilledWithLoredTool(World world, LivingEntity entity, ItemStack tool) {
         if (!hasLore(tool)) {
@@ -201,23 +226,29 @@ public class statTrackLore {
     }
 
     /**
-     * Handles damage prevented by armor set (unused currently - distributed to pieces).
-     * @param player The player whose armor prevented damage.
+     * Handles damage prevented by armor set (unused currently - distributed to
+     * pieces).
+     * 
+     * @param player          The player whose armor prevented damage.
      * @param damagePrevented The total damage prevented.
      */
-    public static void onDamagePreventedByArmor(net.minecraft.server.network.ServerPlayerEntity player, float damagePrevented) {
+    public static void onDamagePreventedByArmor(net.minecraft.server.network.ServerPlayerEntity player,
+            float damagePrevented) {
         ItemLore.LOGGER.info("[statTrackLore] onDamagePreventedByArmor called - damagePrevented: {}", damagePrevented);
-        // This method is called but currently unused since we're distributing to individual pieces
+        // This method is called but currently unused since we're distributing to
+        // individual pieces
         // Could be used for total armor stats if needed
     }
 
     /**
      * Handles damage prevented by a specific armor piece.
-     * @param armorPiece The armor item stack.
+     * 
+     * @param armorPiece      The armor item stack.
      * @param damagePrevented The damage prevented by this piece.
      */
     public static void onArmorPiecePreventedDamage(ItemStack armorPiece, float damagePrevented) {
-        ItemLore.LOGGER.info("[statTrackLore] onArmorPiecePreventedDamage called - item: {}, damagePrevented: {}", armorPiece.getName().getString(), damagePrevented);
+        ItemLore.LOGGER.info("[statTrackLore] onArmorPiecePreventedDamage called - item: {}, damagePrevented: {}",
+                armorPiece.getName().getString(), damagePrevented);
         ItemLore.LOGGER.info("[statTrackLore] Item hasLore: {}", hasLore(armorPiece));
 
         if (!hasLore(armorPiece)) {
@@ -245,7 +276,8 @@ public class statTrackLore {
         newPrevention = Math.round(newPrevention * 10.0f) / 10.0f;
         stats.putFloat("damage_prevented", newPrevention);
 
-        ItemLore.LOGGER.info("[statTrackLore] Updated damage_prevented from {} to {}", currentPrevention, newPrevention);
+        ItemLore.LOGGER.info("[statTrackLore] Updated damage_prevented from {} to {}", currentPrevention,
+                newPrevention);
 
         armorPiece.set(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(customData));
 
@@ -256,43 +288,52 @@ public class statTrackLore {
 
     /**
      * Gets the armor stats for an armor piece.
+     * 
      * @param armorPiece The armor item stack.
      * @return A map of armor stats.
      */
     public static Map<String, Float> getArmorStats(ItemStack armorPiece) {
-        if (!hasLore(armorPiece)) return Collections.emptyMap();
+        if (!hasLore(armorPiece))
+            return Collections.emptyMap();
 
         NbtComponent nbt = armorPiece.get(DataComponentTypes.CUSTOM_DATA);
-        if (nbt == null) return Collections.emptyMap();
+        if (nbt == null)
+            return Collections.emptyMap();
 
         NbtCompound customData = nbt.copyNbt();
         Optional<NbtCompound> statsOpt = customData.getCompound("armor_stats");
-        if (statsOpt.isEmpty()) return Collections.emptyMap();
+        if (statsOpt.isEmpty())
+            return Collections.emptyMap();
 
         NbtCompound stats = statsOpt.get();
         Map<String, Float> result = new HashMap<>();
         for (String key : stats.getKeys()) {
             float val = stats.getFloat(key).orElse(0.0f);
-            if (val > 0) result.put(key, val);
+            if (val > 0)
+                result.put(key, val);
         }
         return result;
     }
 
     /**
      * Updates the armor item's lore with damage prevention stats.
+     * 
      * @param armorPiece The armor item stack.
      */
     private static void updateArmorLore(ItemStack armorPiece) {
         LoreComponent existingLore = armorPiece.get(DataComponentTypes.LORE);
-        if (existingLore == null) return;
+        if (existingLore == null)
+            return;
         List<Text> existingLines = existingLore.lines();
 
-        // Preserve original lore (assuming first up to 2 non-empty lines are date and UID)
+        // Preserve original lore (assuming first up to 2 non-empty lines are date and
+        // UID)
         List<Text> newLines = new ArrayList<>();
         for (Text line : existingLines) {
             if (!line.getString().isEmpty()) {
                 newLines.add(line);
-                if (newLines.size() >= 2) break;
+                if (newLines.size() >= 2)
+                    break;
             }
         }
 
@@ -300,16 +341,17 @@ public class statTrackLore {
         Map<String, Float> armorStats = getArmorStats(armorPiece);
         float damagePrevented = armorStats.getOrDefault("damage_prevented", 0.0f);
         if (damagePrevented > 0) {
-            newLines.add(Text.literal("Damage Prevented: " + damagePrevented).setStyle(Style.EMPTY.withColor(Formatting.DARK_GRAY)));
+            newLines.add(Text.literal("Damage Prevented: " + damagePrevented)
+                    .setStyle(Style.EMPTY.withColor(Formatting.DARK_GRAY)));
         }
 
         armorPiece.set(DataComponentTypes.LORE, new LoreComponent(newLines));
     }
 
-
     /**
      * Gets the key for the block based on its ID path.
      * Tracks all blocks broken.
+     * 
      * @param block The block broken.
      * @return The key for stats.
      */
@@ -322,6 +364,7 @@ public class statTrackLore {
 
     /**
      * Gets the base key for grouping in stats display.
+     * 
      * @param key The raw key from stats.
      * @return The base key for grouping.
      */
@@ -337,21 +380,26 @@ public class statTrackLore {
 
     /**
      * Updates the item's lore with combined stats.
-     * Shows blocks mined and mobs killed in gray text, or damage prevented for armor.
+     * Shows blocks mined and mobs killed in gray text, or damage prevented for
+     * armor.
      * For weapons, also shows the most killed mob type.
+     * 
      * @param item The item stack.
      */
     private static void updateItemLore(ItemStack item) {
         LoreComponent existingLore = item.get(DataComponentTypes.LORE);
-        if (existingLore == null) return;
+        if (existingLore == null)
+            return;
         List<Text> existingLines = existingLore.lines();
 
-        // Preserve original lore (assuming first up to 2 non-empty lines are date and UID)
+        // Preserve original lore (assuming first up to 2 non-empty lines are date and
+        // UID)
         List<Text> newLines = new ArrayList<>();
         for (Text line : existingLines) {
             if (!line.getString().isEmpty()) {
                 newLines.add(line);
-                if (newLines.size() >= 2) break;
+                if (newLines.size() >= 2)
+                    break;
             }
         }
 
@@ -369,14 +417,16 @@ public class statTrackLore {
         Map<String, Integer> miningStats = getMiningStats(item);
         int totalBlocks = miningStats.values().stream().mapToInt(Integer::intValue).sum();
         if (totalBlocks > 0) {
-            newLines.add(Text.literal("Blocks Mined: " + totalBlocks).setStyle(Style.EMPTY.withColor(Formatting.DARK_GRAY)));
+            newLines.add(
+                    Text.literal("Blocks Mined: " + totalBlocks).setStyle(Style.EMPTY.withColor(Formatting.DARK_GRAY)));
         }
 
         // Calculate total mobs killed
         Map<String, Integer> killStats = getKillStats(item);
         int totalMobs = killStats.values().stream().mapToInt(Integer::intValue).sum();
         if (totalMobs > 0) {
-            newLines.add(Text.literal("Mobs Killed: " + totalMobs).setStyle(Style.EMPTY.withColor(Formatting.DARK_GRAY)));
+            newLines.add(
+                    Text.literal("Mobs Killed: " + totalMobs).setStyle(Style.EMPTY.withColor(Formatting.DARK_GRAY)));
         }
 
         // For weapons, add most killed mob
@@ -389,7 +439,8 @@ public class statTrackLore {
                     mostKilled = entry.getKey();
                 }
             }
-            newLines.add(Text.literal("Most Killed: " + mostKilled + " (" + maxCnt + ")").setStyle(Style.EMPTY.withColor(Formatting.DARK_GRAY)));
+            newLines.add(Text.literal("Most Killed: " + mostKilled + " (" + maxCnt + ")")
+                    .setStyle(Style.EMPTY.withColor(Formatting.DARK_GRAY)));
         }
 
         item.set(DataComponentTypes.LORE, new LoreComponent(newLines));
