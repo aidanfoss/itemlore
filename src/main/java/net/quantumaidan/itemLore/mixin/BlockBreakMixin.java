@@ -6,39 +6,39 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import net.minecraft.block.BlockState;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.network.ServerPlayerInteractionManager;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerPlayerGameMode;
+import net.minecraft.world.level.block.state.BlockState;
 import net.quantumaidan.itemLore.util.statTrackLore;
 
-@Mixin(ServerPlayerInteractionManager.class)
+@Mixin(ServerPlayerGameMode.class)
 public class BlockBreakMixin {
 
     @Shadow
     @Final
-    private ServerPlayerEntity player;
+    private ServerPlayer player;
 
     @Shadow
     @Final
-    private ServerWorld world;
+    private ServerLevel level;
 
     private BlockState lastBrokenState;
 
-    @Inject(method = "tryBreakBlock", at = @At("HEAD"))
+    @SuppressWarnings("null")
+    @Inject(method = "destroyBlock", at = @At("HEAD"))
     private void beforeTryBreakBlock(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
-        this.lastBrokenState = this.world.getBlockState(pos);
+        this.lastBrokenState = this.level.getBlockState(pos);
     }
 
-    @Inject(method = "tryBreakBlock", at = @At("TAIL"))
+    @Inject(method = "destroyBlock", at = @At("TAIL"))
     private void afterTryBreakBlock(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
         if (cir.getReturnValue()) {
-            if (net.quantumaidan.itemLore.config.itemLoreConfig.forceLore) {
-                net.quantumaidan.itemLore.util.setLore.applyNewLore(this.player, this.player.getMainHandStack());
+            if (net.quantumaidan.itemLore.config.itemLoreConfig.forceLoreMode != net.quantumaidan.itemLore.config.itemLoreConfig.ForceLoreMode.OFF) {
+                net.quantumaidan.itemLore.util.setLore.applyNewLore(this.player, this.player.getMainHandItem());
             }
-            statTrackLore.onBlockBrokenWithLoredTool(pos, this.lastBrokenState, this.player.getMainHandStack());
+            statTrackLore.onBlockBrokenWithLoredTool(pos, this.lastBrokenState, this.player.getMainHandItem());
         }
     }
 }

@@ -1,25 +1,38 @@
 package net.quantumaidan.itemLore.util;
 
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.LoreComponent;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.quantumaidan.itemLore.ItemLore;
-import net.quantumaidan.itemLore.config.itemLoreConfig;
-import java.util.List;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
+
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.quantumaidan.itemLore.ItemLore;
+import net.quantumaidan.itemLore.config.itemLoreConfig;
 
 public class setLore {
 
-    public static boolean applyNewLore(PlayerEntity player, ItemStack itemStack) {
-        if (!itemLoreConfig.enabled) return false;
+    public static void applyForcedLore(Player player, ItemStack itemStack) {
+        if (itemLoreConfig.forceLoreMode == itemLoreConfig.ForceLoreMode.OFF) {
+            return;
+        }
+
+        if (itemLoreConfig.forceLoreMode == itemLoreConfig.ForceLoreMode.ALL ||
+                (itemLoreConfig.forceLoreMode == itemLoreConfig.ForceLoreMode.UNSTACKABLE
+                        && itemStack.getMaxStackSize() == 1)) {
+            applyNewLore(player, itemStack);
+        }
+    }
+
+    @SuppressWarnings("null")
+    public static boolean applyNewLore(Player player, ItemStack itemStack) {
+        if (!itemLoreConfig.enabled)
+            return false;
 
         // Safe time zone handling
         TimeZone tz = TimeZone.getTimeZone(itemLoreConfig.timeZone);
@@ -41,20 +54,21 @@ public class setLore {
             }
         } catch (IllegalArgumentException e) {
             reportDate = "Invalid Date Format";
-            ItemLore.LOGGER.warn("[ItemLore] Invalid date format '{}', using fallback text", itemLoreConfig.dateTimeFormatConfig);
+            ItemLore.LOGGER.warn("[ItemLore] Invalid date format '{}', using fallback text",
+                    itemLoreConfig.dateTimeFormatConfig);
         }
 
-        LoreComponent inputLore = itemStack.get(DataComponentTypes.LORE);
+        net.minecraft.world.item.component.ItemLore inputLore = itemStack.get(DataComponents.LORE);
         if (inputLore == null || inputLore.lines() == null || inputLore.lines().isEmpty()) {
-            LoreComponent newLoreComponent = new LoreComponent(List.of(
-                    Text.literal(reportDate).setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)),
-                    Text.literal("UID: ").append(player.getDisplayName()).setStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE))
-            ));
+            net.minecraft.world.item.component.ItemLore newLoreComponent = new net.minecraft.world.item.component.ItemLore(
+                    new java.util.ArrayList<>(List.of(
+                            Component.literal(reportDate).setStyle(Style.EMPTY.withColor(ChatFormatting.DARK_PURPLE)),
+                            Component.literal("UID: ").append(player.getDisplayName())
+                                    .setStyle(Style.EMPTY.withColor(ChatFormatting.DARK_PURPLE)))));
 
-            itemStack.set(DataComponentTypes.LORE, newLoreComponent);
+            itemStack.set(DataComponents.LORE, newLoreComponent);
             return true;
         }
-
 
         return false;
     }

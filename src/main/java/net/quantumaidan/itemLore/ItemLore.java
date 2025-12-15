@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,13 +14,12 @@ import com.mojang.brigadier.context.CommandContext;
 import eu.midnightdust.lib.config.MidnightConfig;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.LoreComponent;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
 import net.quantumaidan.itemLore.config.itemLoreConfig;
 import net.quantumaidan.itemLore.util.setLore;
 import net.quantumaidan.itemLore.util.statTrackLore;
@@ -30,99 +28,164 @@ public class ItemLore implements ModInitializer {
 	public static final String MOD_ID = "itemLore";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
+	@SuppressWarnings({ "null"})
 	@Override
 	public void onInitialize() {
 		MidnightConfig.init("itemLore", itemLoreConfig.class);
 
 		LOGGER.info(MOD_ID + " Initialized");
 
-		// ApplyLore Command
+		// Itemlore Command
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-			dispatcher.register(CommandManager.literal("applylore")
+			dispatcher.register(Commands.literal("itemlore")
+					// Root: Apply lore or show stats if exists
 					.executes(context -> {
-						if (context.getSource().getPlayer() == null) { // not a player
-							context.getSource().sendError(Text.literal("Something attempted to run ApplyLore"));
-							return 1;
-						} else if (!itemLoreConfig.enabled) { // feature is disabled
-							context.getSource().getPlayer().sendMessage(Text.literal("ItemLore is currently disabled."),
-									false);
-							return 1;
-						} else if (context.getSource().getPlayer().getMainHandStack() == null) { // player is not
-																									// holding an item
-							context.getSource().getPlayer().sendMessage(Text.literal("You are not holding anything!"),
-									false);
-							return 1;
-						} else if (context.getSource().getPlayer().getMainHandStack() != null) { // player is holding
-																									// item
-							if (setLore.applyNewLore(context.getSource().getPlayer(),
-									Objects.requireNonNull(context.getSource().getPlayer()).getMainHandStack())) {
-								context.getSource().sendMessage(Text.literal("Lore applied!"));
-								return 1;
-							} else {
-								context.getSource().sendMessage(Text.literal("Lore already exists."));
-								return 1;
-							}
+						// feature is disabled
+						if (!itemLoreConfig.enabled) {
+							context.getSource().sendFailure(Component.literal("ItemLore is currently disabled."));
+							return 0;
 						}
-						context.getSource().sendError(Text.literal("Error: fell off the end of the function."));
-						context.getSource().getPlayer().sendMessage(Text.literal("lore application attempted"), false);
-						context.getSource().getPlayer()
-								.sendMessage(Text.literal(context.getSource().getPlayer().toString()), false);
-						context.getSource().getPlayer().sendMessage(
-								Text.literal(context.getSource().getPlayer().getMainHandStack().toString()), false);
-						return 1;
-					}));
-		});
+						//player doesnt exist
+						var player = context.getSource().getPlayer();
+						if (player == null)
+							return 0;
+						
+						//item not in hand
+						ItemStack stack = player.getMainHandItem();
+						if (stack.isEmpty()) {
+							context.getSource().sendFailure(Component.literal("You must be holding an item."));
+							return 0;
+						}
 
-		// getComponents
-		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-			dispatcher.register(CommandManager.literal("getComponents")
-					.requires(source -> source.hasPermissionLevel(2))
-					.executes(context -> {
-						ItemStack stack = Objects.requireNonNull(context.getSource().getPlayer()).getMainHandStack();
-						LoreComponent loreComponent = new LoreComponent(List.of());
-						context.getSource().getPlayer()
-								.sendMessage(Text.literal(stack.get(DataComponentTypes.LORE).toString()));
-						context.getSource().getPlayer().sendMessage(Text.literal(loreComponent.toString()));
-						return 0;
-					}));
-		});
+						// Try to apply lore
+						if (setLore.applyNewLore(player, stack)) {
+							context.getSource().sendSuccess(() -> Component.literal("Lore applied!"), false);
+							return 1;
+						} else {
+							// Lore exists, show all stats
+							return handleStatsCommand(context, StatMode.ALL);
+						}
+					})
 
-		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-			dispatcher.register(CommandManager.literal("toggleItemLore")
-					.requires(source -> source.hasPermissionLevel(2))
-					.executes(context -> {
-						itemLoreConfig.enabled = !itemLoreConfig.enabled;
-						context.getSource().sendFeedback(
-								() -> Text.literal("ItemLore Toggle set to: " + itemLoreConfig.enabled), false);
-						return 1;
-					}));
-		});
+					// /itemlore apply
+					.then(Commands.literal("apply")
+							.executes(context -> {
+								if (!itemLoreConfig.enabled) {
+									context.getSource()
+											.sendFailure(Component.literal("ItemLore is currently disabled."));
+									return 0;
+								}
+								var player = context.getSource().getPlayer();
+								if (player == null)
+									return 0;
+								if (setLore.applyNewLore(player, player.getMainHandItem())) {
+									context.getSource().sendSuccess(() -> Component.literal("Lore applied!"), false);
+								} else {
+									context.getSource().sendFailure(Component.literal("Lore already exists."));
+								}
+								return 1;
+							}))
 
-		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-			dispatcher.register(CommandManager.literal("toggleForceLore")
-					.requires(source -> source.hasPermissionLevel(2))
-					.executes(context -> {
-						itemLoreConfig.forceLore = !itemLoreConfig.forceLore;
-						context.getSource().sendFeedback(
-								() -> Text.literal("ForceLore Toggle set to: " + itemLoreConfig.forceLore), false);
-						return 1;
-					}));
-		});
+					// /itemlore stats {all,kills,blocks}
+					.then(Commands.literal("stats")
+							.executes(context -> handleStatsCommand(context, StatMode.DEFAULT))
+							.then(Commands.literal("all")
+									.executes(context -> handleStatsCommand(context, StatMode.ALL)))
+							.then(Commands.literal("kills")
+									.executes(context -> handleStatsCommand(context, StatMode.MOBS)))
+							.then(Commands.literal("blocks")
+									.executes(context -> handleStatsCommand(context, StatMode.BLOCKS))))
 
-		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-			dispatcher.register(CommandManager.literal("stats")
-					.executes(context -> handleStatsCommand(context, StatMode.DEFAULT))
-					.then(CommandManager.literal("all")
-							.executes(context -> handleStatsCommand(context, StatMode.ALL)))
-					.then(CommandManager.literal("blocks")
-							.executes(context -> handleStatsCommand(context, StatMode.BLOCKS)))
-					.then(CommandManager.literal("mobs")
-							.executes(context -> handleStatsCommand(context, StatMode.MOBS))));
+					// /itemlore forceLore {all, nonstackables, off}
+					.then(Commands.literal("forceLore")
+							.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+							.executes(context -> {
+								switch (itemLoreConfig.forceLoreMode) {
+									case OFF:
+										itemLoreConfig.forceLoreMode = itemLoreConfig.ForceLoreMode.UNSTACKABLE;
+										break;
+									case UNSTACKABLE:
+										itemLoreConfig.forceLoreMode = itemLoreConfig.ForceLoreMode.ALL;
+										break;
+									case ALL:
+										itemLoreConfig.forceLoreMode = itemLoreConfig.ForceLoreMode.OFF;
+										break;
+								}
+								context.getSource().sendSuccess(() -> Component.literal(
+										"ForceLore Mode set to: " + itemLoreConfig.forceLoreMode), false);
+								return 1;
+							})
+							.then(Commands.literal("all")
+									.executes(context -> setForceLore(context, itemLoreConfig.ForceLoreMode.ALL)))
+							.then(Commands.literal("nonstackables").executes(
+									context -> setForceLore(context, itemLoreConfig.ForceLoreMode.UNSTACKABLE)))
+							.then(Commands.literal("off")
+									.executes(context -> setForceLore(context, itemLoreConfig.ForceLoreMode.OFF))))
+
+					// /itemlore toggle {on/true, off/false}
+					.then(Commands.literal("toggle")
+							.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+							.executes(context -> {
+								itemLoreConfig.enabled = !itemLoreConfig.enabled;
+								context.getSource().sendSuccess(
+										() -> Component.literal("ItemLore enabled: " + itemLoreConfig.enabled), false);
+								return 1;
+							})
+							.then(Commands.literal("on").executes(context -> setEnabled(context, true)))
+							.then(Commands.literal("true").executes(context -> setEnabled(context, true)))
+							.then(Commands.literal("off").executes(context -> setEnabled(context, false)))
+							.then(Commands.literal("false").executes(context -> setEnabled(context, false))))
+
+					// /itemlore remove
+					.then(Commands.literal("remove")
+							.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+							.executes(context -> {
+								var player = context.getSource().getPlayer();
+								if (player == null)
+									return 0;
+								ItemStack stack = player.getMainHandItem();
+								if (!stack.isEmpty()) {
+									// Remove lore component
+									stack.set(DataComponents.LORE,
+											new net.minecraft.world.item.component.ItemLore(List.of()));
+									context.getSource().sendSuccess(() -> Component.literal("Lore removed."), true);
+									return 1;
+								}
+								context.getSource().sendFailure(Component.literal("Hold an item."));
+								return 0;
+							}))
+
+					// /itemlore debug
+					.then(Commands.literal("debug")
+							.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+							.executes(context -> {
+								var player = context.getSource().getPlayer();
+								if (player == null)
+									return 0;
+								ItemStack stack = player.getMainHandItem();
+								context.getSource().sendSystemMessage(
+										Component.literal("Lore Component: " + stack.get(DataComponents.LORE)));
+								return 1;
+							})));
 		});
 	}
 
 	private enum StatMode {
 		DEFAULT, ALL, BLOCKS, MOBS
+	}
+
+	private static int setForceLore(CommandContext<CommandSourceStack> context, itemLoreConfig.ForceLoreMode mode) {
+		itemLoreConfig.forceLoreMode = mode;
+		context.getSource().sendSuccess(
+				() -> Component.literal("ForceLore Mode set to: " + itemLoreConfig.forceLoreMode),
+				false);
+		return 1;
+	}
+
+	private static int setEnabled(CommandContext<CommandSourceStack> context, boolean enabled) {
+		itemLoreConfig.enabled = enabled;
+		context.getSource().sendSuccess(() -> Component.literal("ItemLore enabled: " + itemLoreConfig.enabled), false);
+		return 1;
 	}
 
 	private static String formatName(String key) {
@@ -140,21 +203,21 @@ public class ItemLore implements ModInitializer {
 		return sb.toString().trim();
 	}
 
-	private static int handleStatsCommand(CommandContext<ServerCommandSource> context, StatMode mode) {
+	private static int handleStatsCommand(CommandContext<CommandSourceStack> context, StatMode mode) {
 		var player = context.getSource().getPlayer();
 		if (player == null) {
-			context.getSource().sendError(Text.literal("Only players can use this command"));
+			context.getSource().sendFailure(Component.literal("Only players can use this command"));
 			return 1;
 		}
-		ItemStack tool = player.getMainHandStack();
+		ItemStack tool = player.getMainHandItem();
 		if (tool.isEmpty() || !statTrackLore.hasLore(tool)) {
-			player.sendMessage(Text.literal("You must be holding a tool with lore."), false);
+			player.displayClientMessage(Component.literal("You must be holding a tool with lore."), false);
 			return 1;
 		}
 		Map<String, Integer> miningStats = statTrackLore.getMiningStats(tool);
 		Map<String, Integer> killStats = statTrackLore.getKillStats(tool);
 		if (miningStats.isEmpty() && killStats.isEmpty()) {
-			player.sendMessage(Text.literal("No stats found."), false);
+			player.displayClientMessage(Component.literal("No stats found."), false);
 			return 0;
 		}
 
@@ -192,11 +255,11 @@ public class ItemLore implements ModInitializer {
 				totalText = "Total Blocks: " + total;
 			} else if (statTrackLore.isAttackTool(tool.getItem())) {
 				total = killStats.values().stream().mapToInt(Integer::intValue).sum();
-				player.sendMessage(Text.literal("=== Combat Stats ===").formatted(Formatting.GOLD), false);
-				player.sendMessage(Text.literal("Total Kills: " + total).formatted(Formatting.AQUA), false);
+				player.displayClientMessage(Component.literal("=== Combat Stats ===").withStyle(ChatFormatting.GOLD), false);
+				player.displayClientMessage(Component.literal("Total Kills: " + total).withStyle(ChatFormatting.AQUA), false);
 				return 1;
 			} else {
-				player.sendMessage(Text.literal("No specific stats to show."), false);
+				player.displayClientMessage(Component.literal("No specific stats to show."), false);
 				return 0;
 			}
 		}
@@ -204,41 +267,41 @@ public class ItemLore implements ModInitializer {
 		if (mode == StatMode.ALL) {
 			// Display blocks and mobs separately
 			if (!miningStats.isEmpty()) {
-				player.sendMessage(Text.literal("=== Block Stats ===").formatted(Formatting.GOLD), false);
+				player.displayClientMessage(Component.literal("=== Block Stats ===").withStyle(ChatFormatting.GOLD), false);
 				List<String> keys = new ArrayList<>(miningStats.keySet());
 				keys.sort(String.CASE_INSENSITIVE_ORDER);
 				for (String key : keys) {
 					int count = miningStats.get(key);
-					player.sendMessage(Text.literal(formatName(key) + ": " + count).formatted(Formatting.AQUA), false);
+					player.displayClientMessage(Component.literal(formatName(key) + ": " + count).withStyle(ChatFormatting.AQUA), false);
 				}
 				int totalBlocks = miningStats.values().stream().mapToInt(Integer::intValue).sum();
-				player.sendMessage(Text.literal("Total Blocks: " + totalBlocks).formatted(Formatting.YELLOW), false);
+				player.displayClientMessage(Component.literal("Total Blocks: " + totalBlocks).withStyle(ChatFormatting.YELLOW), false);
 			}
 			if (!killStats.isEmpty()) {
-				player.sendMessage(Text.literal("=== Mob Stats ===").formatted(Formatting.GOLD), false);
+				player.displayClientMessage(Component.literal("=== Mob Stats ===").withStyle(ChatFormatting.GOLD), false);
 				List<String> keys = new ArrayList<>(killStats.keySet());
 				keys.sort(String.CASE_INSENSITIVE_ORDER);
 				for (String key : keys) {
 					int count = killStats.get(key);
-					player.sendMessage(Text.literal(formatName(key) + ": " + count).formatted(Formatting.AQUA), false);
+					player.displayClientMessage(Component.literal(formatName(key) + ": " + count).withStyle(ChatFormatting.AQUA), false);
 				}
 				int totalMobs = killStats.values().stream().mapToInt(Integer::intValue).sum();
-				player.sendMessage(Text.literal("Total Kills: " + totalMobs).formatted(Formatting.YELLOW), false);
+				player.displayClientMessage(Component.literal("Total Kills: " + totalMobs).withStyle(ChatFormatting.YELLOW), false);
 			}
 			if (!miningStats.isEmpty() || !killStats.isEmpty()) {
 				int totalActions = miningStats.values().stream().mapToInt(Integer::intValue).sum()
 						+ killStats.values().stream().mapToInt(Integer::intValue).sum();
-				player.sendMessage(Text.literal("Total Actions: " + totalActions).formatted(Formatting.YELLOW), false);
+				player.displayClientMessage(Component.literal("Total Actions: " + totalActions).withStyle(ChatFormatting.YELLOW), false);
 			}
 		} else {
 			List<String> keys = new ArrayList<>(displayStats.keySet());
 			keys.sort(String.CASE_INSENSITIVE_ORDER);
-			player.sendMessage(Text.literal(header).formatted(Formatting.GOLD), false);
+			player.displayClientMessage(Component.literal(header).withStyle(ChatFormatting.GOLD), false);
 			for (String key : keys) {
 				int count = displayStats.get(key);
-				player.sendMessage(Text.literal(formatName(key) + ": " + count).formatted(Formatting.AQUA), false);
+				player.displayClientMessage(Component.literal(formatName(key) + ": " + count).withStyle(ChatFormatting.AQUA), false);
 			}
-			player.sendMessage(Text.literal(totalText).formatted(Formatting.YELLOW), false);
+			player.displayClientMessage(Component.literal(totalText).withStyle(ChatFormatting.YELLOW), false);
 		}
 		return 1;
 	}

@@ -19,20 +19,49 @@ ItemLore is a **Fabric** mod that adds customizable lore and stat‑tracking cap
 3. Launch Minecraft with the Fabric loader.
 
 ## Usage
-- **Toggle ItemLore**:
+- **General Usage**:
+  All commands now start with `/itemlore`.
   ```
-  /toggleItemLore
+  /itemlore
   ```
-- **Give an item lore**:
+  Applies lore to the held item if it doesn't exist. If lore exists, shows all recorded stats.
+
+- **Apply Lore**:
   ```
-  /applylore
+  /itemlore apply
   ```
-- **View stats**:
+  explicitly tries to apply lore to the held item.
+
+- **View Stats**:
   ```
-  /stats all   # Show global stats
-  /stats blocks  # Show block stats
-  /stats mobs  # Show mob stats
+  /itemlore stats <all|kills|blocks>
   ```
+  - `all`: Show all stats (blocks mined + mobs killed).
+  - `kills`: Show mob kill counts.
+  - `blocks`: Show block break counts.
+  
+  *Note: `/itemlore stats` with no arguments defaults to showing relevant stats based on the tool type.*
+
+- **Admin / Configuration**:
+  ```
+  /itemlore toggle [on|off]
+  ```
+  Toggles the mod functionality globally.
+
+  ```
+  /itemlore forceLore [all|nonstackables|off] 
+  ```
+  Sets the strictness of lore enforcement. Passing no arguments cycles through modes.
+
+  ```
+  /itemlore remove
+  ```
+  Removes ItemLore data from the held item.
+
+  ```
+  /itemlore debug
+  ```
+  Displays raw NBT/Component data for debugging.
 
 ## Building from Source
 ```bash

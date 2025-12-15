@@ -6,8 +6,12 @@ public class itemLoreConfig extends MidnightConfig {
     @Entry(name = "Toggle")
     public static boolean enabled = true;
 
-    @Entry(name = "Force Lore")
-    public static boolean forceLore = false;
+    @Entry(name = "Force Lore Mode")
+    public static ForceLoreMode forceLoreMode = ForceLoreMode.OFF;
+
+    public enum ForceLoreMode {
+        ALL, UNSTACKABLE, OFF
+    }
 
     @Comment(name = "Defaults if input is nonsense", centered = true)
     public static String comment1;

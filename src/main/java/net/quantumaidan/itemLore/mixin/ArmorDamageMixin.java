@@ -1,18 +1,18 @@
 package net.quantumaidan.itemLore.mixin;
 
+import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.quantumaidan.itemLore.ItemLore;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.component.type.AttributeModifiersComponent;
-import net.minecraft.component.DataComponentTypes;
 import net.quantumaidan.itemLore.util.statTrackLore;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.Enchantments;
 import java.util.Map;
 import java.util.HashMap;
 import org.spongepowered.asm.mixin.Mixin;
@@ -20,19 +20,19 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(net.minecraft.server.network.ServerPlayerEntity.class)
+@Mixin(net.minecraft.server.level.ServerPlayer.class)
 public class ArmorDamageMixin {
 
-    @Inject(method = "damage", at = @At("HEAD"))
-    private void onPlayerDamageApplied(net.minecraft.server.world.ServerWorld world,
+    @Inject(method = "hurtServer", at = @At("HEAD"))
+    private void onPlayerDamageApplied(net.minecraft.server.level.ServerLevel world,
                                        DamageSource source,
                                        float amount,
                                        CallbackInfoReturnable<Boolean> cir) {
-        net.minecraft.server.network.ServerPlayerEntity player =
-                (net.minecraft.server.network.ServerPlayerEntity) (Object) this;
+        net.minecraft.server.level.ServerPlayer player =
+                (net.minecraft.server.level.ServerPlayer) (Object) this;
 
         ItemLore.LOGGER.info("[ArmorDamageMixin] PLAYER DAMAGE DETECTED - entity: {}, source: {}, amount: {}",
-                player.getName().getString(), source.getName(), amount);
+                player.getName().getString(), source.getMsgId(), amount);
 
         EquipmentSlot[] armorSlots = {
                 EquipmentSlot.HEAD,
@@ -44,19 +44,20 @@ public class ArmorDamageMixin {
 
         // Count equipped armor pieces
         for (EquipmentSlot slot : armorSlots) {
-            net.minecraft.item.ItemStack armorStack = player.getEquippedStack(slot);
+            @SuppressWarnings("null")
+            net.minecraft.world.item.ItemStack armorStack = player.getItemBySlot(slot);
             if (!armorStack.isEmpty() && hasArmorValue(armorStack, slot)) {
                 equippedArmorCount++;
                 ItemLore.LOGGER.info("[ArmorDamageMixin] Found armor in slot {}: {}",
-                        slot, armorStack.getName().getString());
+                        slot, armorStack.getHoverName().getString());
             }
         }
 
-        boolean isFallDamage = "fall".equals(source.getName());
-        boolean isFireDamage = source.isIn(net.minecraft.registry.tag.DamageTypeTags.IS_FIRE);
-        boolean isExplosion = source.isIn(net.minecraft.registry.tag.DamageTypeTags.IS_EXPLOSION);
-        boolean isProjectile = source.isIn(net.minecraft.registry.tag.DamageTypeTags.IS_PROJECTILE);
-        boolean bypassesArmor = source.isIn(net.minecraft.registry.tag.DamageTypeTags.BYPASSES_ARMOR);
+        boolean isFallDamage = "fall".equals(source.getMsgId());
+        boolean isFireDamage = source.is(net.minecraft.tags.DamageTypeTags.IS_FIRE);
+        boolean isExplosion = source.is(net.minecraft.tags.DamageTypeTags.IS_EXPLOSION);
+        boolean isProjectile = source.is(net.minecraft.tags.DamageTypeTags.IS_PROJECTILE);
+        boolean bypassesArmor = source.is(net.minecraft.tags.DamageTypeTags.BYPASSES_ARMOR);
 
         ItemLore.LOGGER.info("[ArmorDamageMixin] Damage type - fall: {}, fire: {}, explosion: {}, projectile: {}, bypasses armor: {}, equippedArmorCount: {}",
                 isFallDamage, isFireDamage, isExplosion, isProjectile, bypassesArmor, equippedArmorCount);
@@ -71,10 +72,11 @@ public class ArmorDamageMixin {
             // Handle fall damage - reduction from enchantments, not armor toughness
             float totalFeatherLevel = 0;
             float totalProtectionLevel = 0;
-            Map<net.minecraft.item.ItemStack, float[]> armorEnchantments = new HashMap<>();
+            Map<net.minecraft.world.item.ItemStack, float[]> armorEnchantments = new HashMap<>();
 
             for (EquipmentSlot slot : armorSlots) {
-                net.minecraft.item.ItemStack armorStack = player.getEquippedStack(slot);
+                @SuppressWarnings("null")
+                net.minecraft.world.item.ItemStack armorStack = player.getItemBySlot(slot);
                 if (!armorStack.isEmpty()) {
                     int feather = getEnchantmentLevelOn(armorStack, Enchantments.FEATHER_FALLING, world);
                     int protection = getEnchantmentLevelOn(armorStack, Enchantments.PROTECTION, world);
@@ -82,7 +84,7 @@ public class ArmorDamageMixin {
                     totalProtectionLevel += protection;
                     armorEnchantments.put(armorStack, new float[]{feather, protection});
                     ItemLore.LOGGER.info("[ArmorDamageMixin] Armor {} has Feather Falling {} and Protection {}",
-                            armorStack.getName().getString(), feather, protection);
+                            armorStack.getHoverName().getString(), feather, protection);
                 }
             }
 
@@ -122,7 +124,8 @@ public class ArmorDamageMixin {
             int totalSpecializedProtection = 0; // For fire/blast/projectile protection
 
             for (EquipmentSlot slot : armorSlots) {
-                net.minecraft.item.ItemStack armorStack = player.getEquippedStack(slot);
+                @SuppressWarnings("null")
+                net.minecraft.world.item.ItemStack armorStack = player.getItemBySlot(slot);
                 if (!armorStack.isEmpty()) {
                     totalArmor += getArmorValue(armorStack, slot);
                     totalToughness += getToughnessValue(armorStack, slot);
@@ -152,7 +155,8 @@ public class ArmorDamageMixin {
 
                 // Calculate per-piece contributions using marginal removal
                 for (EquipmentSlot slot : armorSlots) {
-                    net.minecraft.item.ItemStack armorStack = player.getEquippedStack(slot);
+                    @SuppressWarnings("null")
+                    net.minecraft.world.item.ItemStack armorStack = player.getItemBySlot(slot);
                     if (!armorStack.isEmpty() && hasArmorValue(armorStack, slot)) {
                         float armorValue = getArmorValue(armorStack, slot);
                         float toughnessValue = getToughnessValue(armorStack, slot);
@@ -177,7 +181,7 @@ public class ArmorDamageMixin {
                         float contribution = totalPrevented - preventedWithout;
 
                         ItemLore.LOGGER.info("[ArmorDamageMixin] Armor piece {} prevented {} damage",
-                                armorStack.getName().getString(), contribution);
+                                armorStack.getHoverName().getString(), contribution);
 
                         statTrackLore.onArmorPiecePreventedDamage(armorStack, contribution);
                     }
@@ -190,9 +194,9 @@ public class ArmorDamageMixin {
         }
     }
 
-    private void distributeFallDamagePrevention(net.minecraft.server.network.ServerPlayerEntity player,
+    private void distributeFallDamagePrevention(net.minecraft.server.level.ServerPlayer player,
                                                 float totalPrevented,
-                                                Map<net.minecraft.item.ItemStack, float[]> armorEnchantments) {
+                                                Map<net.minecraft.world.item.ItemStack, float[]> armorEnchantments) {
         float totalContribution = 0.0f;
 
         // Calculate total enchantment contribution (weighted: feather * 3 + protection * 1 for proportional distribution)
@@ -204,15 +208,15 @@ public class ArmorDamageMixin {
 
         if (totalContribution > 0.0f) {
             // Distribute damage prevention proportionally based on each piece's weighted enchantment contribution
-            for (java.util.Map.Entry<net.minecraft.item.ItemStack, float[]> entry : armorEnchantments.entrySet()) {
-                net.minecraft.item.ItemStack armorStack = entry.getKey();
+            for (java.util.Map.Entry<net.minecraft.world.item.ItemStack, float[]> entry : armorEnchantments.entrySet()) {
+                net.minecraft.world.item.ItemStack armorStack = entry.getKey();
                 float featherLevel = entry.getValue()[0];
                 float protectionLevel = entry.getValue()[1];
                 float contribution = featherLevel * 3 + protectionLevel;
                 float proportionalPrevention = (contribution / totalContribution) * totalPrevented;
                 ItemLore.LOGGER.info(
                         "[ArmorDamageMixin] Distributing {} fall damage protection to {} (weighted contribution: {}, feather: {}, protection: {})",
-                        proportionalPrevention, armorStack.getName().getString(), contribution, featherLevel,
+                        proportionalPrevention, armorStack.getHoverName().getString(), contribution, featherLevel,
                         protectionLevel
                 );
                 statTrackLore.onArmorPiecePreventedDamage(armorStack, proportionalPrevention);
@@ -225,29 +229,31 @@ public class ArmorDamageMixin {
     /**
      * Check if an item stack has armor value in the given slot
      */
-    private boolean hasArmorValue(net.minecraft.item.ItemStack stack, EquipmentSlot slot) {
+    private boolean hasArmorValue(net.minecraft.world.item.ItemStack stack, EquipmentSlot slot) {
         return getArmorValue(stack, slot) > 0;
     }
 
     /**
      * Get armor protection value from attribute modifiers
      */
-    private float getArmorValue(net.minecraft.item.ItemStack stack, EquipmentSlot slot) {
-        AttributeModifiersComponent modifiers = stack.getOrDefault(DataComponentTypes.ATTRIBUTE_MODIFIERS, AttributeModifiersComponent.DEFAULT);
+    @SuppressWarnings("null")
+    private float getArmorValue(net.minecraft.world.item.ItemStack stack, EquipmentSlot slot) {
+        ItemAttributeModifiers modifiers = stack.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
         return (float) modifiers.modifiers().stream()
-                .filter(entry -> entry.slot().matches(slot) && entry.attribute().equals(EntityAttributes.ARMOR))
-                .mapToDouble(entry -> entry.modifier().value())
+                .filter(entry -> entry.slot().test(slot) && entry.attribute().equals(Attributes.ARMOR))
+                .mapToDouble(entry -> entry.modifier().amount())
                 .sum();
     }
 
     /**
      * Get armor toughness value from attribute modifiers
      */
-    private float getToughnessValue(net.minecraft.item.ItemStack stack, EquipmentSlot slot) {
-        AttributeModifiersComponent modifiers = stack.getOrDefault(DataComponentTypes.ATTRIBUTE_MODIFIERS, AttributeModifiersComponent.DEFAULT);
+    @SuppressWarnings("null")
+    private float getToughnessValue(net.minecraft.world.item.ItemStack stack, EquipmentSlot slot) {
+        ItemAttributeModifiers modifiers = stack.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
         return (float) modifiers.modifiers().stream()
-                .filter(entry -> entry.slot().matches(slot) && entry.attribute().equals(EntityAttributes.ARMOR_TOUGHNESS))
-                .mapToDouble(entry -> entry.modifier().value())
+                .filter(entry -> entry.slot().test(slot) && entry.attribute().equals(Attributes.ARMOR_TOUGHNESS))
+                .mapToDouble(entry -> entry.modifier().amount())
                 .sum();
     }
 
@@ -257,14 +263,14 @@ public class ArmorDamageMixin {
      * - Use RegistryKeys.ENCHANTMENT
      * - Get a RegistryEntry<Enchantment> and feed it to EnchantmentHelper
      */
-    private static int getEnchantmentLevelOn(net.minecraft.item.ItemStack stack, RegistryKey<Enchantment> key, net.minecraft.world.World world) {
-        ItemLore.LOGGER.info("[ArmorDamageMixin] Getting enchantment level for {} on {}", key, stack.getName().getString());
-        Registry<Enchantment> registry = world.getRegistryManager().getOrThrow(RegistryKeys.ENCHANTMENT);
-        java.util.Optional<Enchantment> enchantmentOpt = registry.getOptionalValue(key);
+    private static int getEnchantmentLevelOn(net.minecraft.world.item.ItemStack stack, ResourceKey<Enchantment> key, net.minecraft.world.level.Level world) {
+        ItemLore.LOGGER.info("[ArmorDamageMixin] Getting enchantment level for {} on {}", key, stack.getHoverName().getString());
+        Registry<Enchantment> registry = world.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
+        java.util.Optional<Enchantment> enchantmentOpt = registry.getOptional(key);
         if (enchantmentOpt.isPresent()) {
             ItemLore.LOGGER.info("[ArmorDamageMixin] Enchantment {} is present in registry", key);
-            net.minecraft.registry.entry.RegistryEntry<Enchantment> entry = registry.getEntry(enchantmentOpt.get());
-            int level = EnchantmentHelper.getLevel(entry, stack);
+            net.minecraft.core.Holder<Enchantment> entry = registry.wrapAsHolder(enchantmentOpt.get());
+            int level = EnchantmentHelper.getItemEnchantmentLevel(entry, stack);
             ItemLore.LOGGER.info("[ArmorDamageMixin] Level: {}", level);
             return level;
         } else {
