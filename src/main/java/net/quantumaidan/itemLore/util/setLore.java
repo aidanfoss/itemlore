@@ -9,12 +9,11 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.quantumaidan.itemLore.ItemLore;
 import net.quantumaidan.itemLore.config.itemLoreConfig;
+import java.util.List;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 import java.util.TimeZone;
 
 public class setLore {

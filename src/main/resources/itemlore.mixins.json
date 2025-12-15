@@ -3,7 +3,10 @@
 	"package": "net.quantumaidan.itemLore.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
-		"ItemLoreMixin"
+		"ItemLoreMixin",
+		"BlockBreakMixin",
+		"EntityDeathMixin",
+		"ArmorDamageMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
