@@ -101,9 +101,19 @@ public class ItemLore implements ModInitializer {
 			dispatcher.register(Commands.literal("toggleForceLore")
 					.requires(source -> source.hasPermission(2))
 					.executes(context -> {
-						itemLoreConfig.forceLore = !itemLoreConfig.forceLore;
+						switch (itemLoreConfig.forceLoreMode) {
+							case OFF:
+								itemLoreConfig.forceLoreMode = itemLoreConfig.ForceLoreMode.UNSTACKABLE;
+								break;
+							case UNSTACKABLE:
+								itemLoreConfig.forceLoreMode = itemLoreConfig.ForceLoreMode.ALL;
+								break;
+							case ALL:
+								itemLoreConfig.forceLoreMode = itemLoreConfig.ForceLoreMode.OFF;
+								break;
+						}
 						context.getSource().sendSuccess(
-								() -> Component.literal("ForceLore Toggle set to: " + itemLoreConfig.forceLore), false);
+								() -> Component.literal("ForceLore Mode set to: " + itemLoreConfig.forceLoreMode), false);
 						return 1;
 					}));
 		});

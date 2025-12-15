@@ -17,8 +17,21 @@ import java.util.TimeZone;
 
 public class setLore {
 
+    public static void applyForcedLore(Player player, ItemStack itemStack) {
+        if (itemLoreConfig.forceLoreMode == itemLoreConfig.ForceLoreMode.OFF) {
+            return;
+        }
+
+        if (itemLoreConfig.forceLoreMode == itemLoreConfig.ForceLoreMode.ALL ||
+                (itemLoreConfig.forceLoreMode == itemLoreConfig.ForceLoreMode.UNSTACKABLE
+                        && itemStack.getMaxStackSize() == 1)) {
+            applyNewLore(player, itemStack);
+        }
+    }
+
     public static boolean applyNewLore(Player player, ItemStack itemStack) {
-        if (!itemLoreConfig.enabled) return false;
+        if (!itemLoreConfig.enabled)
+            return false;
 
         // Safe time zone handling
         TimeZone tz = TimeZone.getTimeZone(itemLoreConfig.timeZone);
@@ -40,20 +53,21 @@ public class setLore {
             }
         } catch (IllegalArgumentException e) {
             reportDate = "Invalid Date Format";
-            ItemLore.LOGGER.warn("[ItemLore] Invalid date format '{}', using fallback text", itemLoreConfig.dateTimeFormatConfig);
+            ItemLore.LOGGER.warn("[ItemLore] Invalid date format '{}', using fallback text",
+                    itemLoreConfig.dateTimeFormatConfig);
         }
 
         net.minecraft.world.item.component.ItemLore inputLore = itemStack.get(DataComponents.LORE);
         if (inputLore == null || inputLore.lines() == null || inputLore.lines().isEmpty()) {
-            net.minecraft.world.item.component.ItemLore newLoreComponent = new net.minecraft.world.item.component.ItemLore(List.of(
-                    Component.literal(reportDate).setStyle(Style.EMPTY.withColor(ChatFormatting.DARK_PURPLE)),
-                    Component.literal("UID: ").append(player.getDisplayName()).setStyle(Style.EMPTY.withColor(ChatFormatting.DARK_PURPLE))
-            ));
+            net.minecraft.world.item.component.ItemLore newLoreComponent = new net.minecraft.world.item.component.ItemLore(
+                    List.of(
+                            Component.literal(reportDate).setStyle(Style.EMPTY.withColor(ChatFormatting.DARK_PURPLE)),
+                            Component.literal("UID: ").append(player.getDisplayName())
+                                    .setStyle(Style.EMPTY.withColor(ChatFormatting.DARK_PURPLE))));
 
             itemStack.set(DataComponents.LORE, newLoreComponent);
             return true;
         }
-
 
         return false;
     }
