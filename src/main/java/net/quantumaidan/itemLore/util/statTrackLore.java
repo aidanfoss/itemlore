@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -162,12 +161,11 @@ public class statTrackLore {
      * Handles when a block is broken with a tool that has lore.
      * Tracks mining stats and updates the item's lore.
      *
-     * @param blockPos   The position of the broken block.
      * @param blockState The state of the broken block.
      * @param tool       The tool used to break the block.
      */
     @SuppressWarnings("null")
-    public static void onBlockBrokenWithLoredTool(BlockPos blockPos, BlockState blockState, ItemStack tool) {
+    public static void onBlockBrokenWithLoredTool(BlockState blockState, ItemStack tool) {
         if (!hasLore(tool)) {
             return;
         }
@@ -233,10 +231,9 @@ public class statTrackLore {
      * Handles damage prevented by armor set (unused currently - distributed to
      * pieces).
      *
-     * @param player          The player whose armor prevented damage.
      * @param damagePrevented The total damage prevented.
      */
-    public static void onDamagePreventedByArmor(net.minecraft.server.level.ServerPlayer player, float damagePrevented) {
+    public static void onDamagePreventedByArmor(float damagePrevented) {
         ItemLore.LOGGER.info("[statTrackLore] onDamagePreventedByArmor called - damagePrevented: {}", damagePrevented);
         // This method is called but currently unused since we're distributing to
         // individual pieces

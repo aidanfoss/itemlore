@@ -106,7 +106,7 @@ public class ArmorDamageMixin {
 
                 if (estimatedReduction > 0) {
                     ItemLore.LOGGER.info("[ArmorDamageMixin] Calling onDamagePreventedByArmor with reduction: {}", estimatedReduction);
-                    statTrackLore.onDamagePreventedByArmor(estimatedReduction);
+                    statTrackLore.onDamagePreventedByArmor();
 
                     // Distribute fall damage prevention proportionally to enchantment levels
                     distributeFallDamagePrevention(player, estimatedReduction, armorEnchantments);
@@ -151,7 +151,7 @@ public class ArmorDamageMixin {
 
             if (totalPrevented > 0) {
                 ItemLore.LOGGER.info("[ArmorDamageMixin] Calling onDamagePreventedByArmor with reduction: {}", totalPrevented);
-                statTrackLore.onDamagePreventedByArmor(totalPrevented);
+                statTrackLore.onDamagePreventedByArmor();
 
                 // Calculate per-piece contributions using marginal removal
                 for (EquipmentSlot slot : armorSlots) {
