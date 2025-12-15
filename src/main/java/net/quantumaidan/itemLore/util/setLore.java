@@ -1,5 +1,11 @@
 package net.quantumaidan.itemLore.util;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.TimeZone;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
@@ -8,12 +14,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.quantumaidan.itemLore.ItemLore;
 import net.quantumaidan.itemLore.config.itemLoreConfig;
-import java.util.List;
-
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
 
 public class setLore {
 
@@ -29,6 +29,7 @@ public class setLore {
         }
     }
 
+    @SuppressWarnings("null")
     public static boolean applyNewLore(Player player, ItemStack itemStack) {
         if (!itemLoreConfig.enabled)
             return false;
@@ -60,10 +61,10 @@ public class setLore {
         net.minecraft.world.item.component.ItemLore inputLore = itemStack.get(DataComponents.LORE);
         if (inputLore == null || inputLore.lines() == null || inputLore.lines().isEmpty()) {
             net.minecraft.world.item.component.ItemLore newLoreComponent = new net.minecraft.world.item.component.ItemLore(
-                    List.of(
+                    new java.util.ArrayList<>(List.of(
                             Component.literal(reportDate).setStyle(Style.EMPTY.withColor(ChatFormatting.DARK_PURPLE)),
                             Component.literal("UID: ").append(player.getDisplayName())
-                                    .setStyle(Style.EMPTY.withColor(ChatFormatting.DARK_PURPLE))));
+                                    .setStyle(Style.EMPTY.withColor(ChatFormatting.DARK_PURPLE)))));
 
             itemStack.set(DataComponents.LORE, newLoreComponent);
             return true;

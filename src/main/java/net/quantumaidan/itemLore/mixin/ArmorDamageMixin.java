@@ -44,6 +44,7 @@ public class ArmorDamageMixin {
 
         // Count equipped armor pieces
         for (EquipmentSlot slot : armorSlots) {
+            @SuppressWarnings("null")
             net.minecraft.world.item.ItemStack armorStack = player.getItemBySlot(slot);
             if (!armorStack.isEmpty() && hasArmorValue(armorStack, slot)) {
                 equippedArmorCount++;
@@ -74,6 +75,7 @@ public class ArmorDamageMixin {
             Map<net.minecraft.world.item.ItemStack, float[]> armorEnchantments = new HashMap<>();
 
             for (EquipmentSlot slot : armorSlots) {
+                @SuppressWarnings("null")
                 net.minecraft.world.item.ItemStack armorStack = player.getItemBySlot(slot);
                 if (!armorStack.isEmpty()) {
                     int feather = getEnchantmentLevelOn(armorStack, Enchantments.FEATHER_FALLING, world);
@@ -122,6 +124,7 @@ public class ArmorDamageMixin {
             int totalSpecializedProtection = 0; // For fire/blast/projectile protection
 
             for (EquipmentSlot slot : armorSlots) {
+                @SuppressWarnings("null")
                 net.minecraft.world.item.ItemStack armorStack = player.getItemBySlot(slot);
                 if (!armorStack.isEmpty()) {
                     totalArmor += getArmorValue(armorStack, slot);
@@ -152,6 +155,7 @@ public class ArmorDamageMixin {
 
                 // Calculate per-piece contributions using marginal removal
                 for (EquipmentSlot slot : armorSlots) {
+                    @SuppressWarnings("null")
                     net.minecraft.world.item.ItemStack armorStack = player.getItemBySlot(slot);
                     if (!armorStack.isEmpty() && hasArmorValue(armorStack, slot)) {
                         float armorValue = getArmorValue(armorStack, slot);
@@ -232,6 +236,7 @@ public class ArmorDamageMixin {
     /**
      * Get armor protection value from attribute modifiers
      */
+    @SuppressWarnings("null")
     private float getArmorValue(net.minecraft.world.item.ItemStack stack, EquipmentSlot slot) {
         ItemAttributeModifiers modifiers = stack.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
         return (float) modifiers.modifiers().stream()
@@ -243,6 +248,7 @@ public class ArmorDamageMixin {
     /**
      * Get armor toughness value from attribute modifiers
      */
+    @SuppressWarnings("null")
     private float getToughnessValue(net.minecraft.world.item.ItemStack stack, EquipmentSlot slot) {
         ItemAttributeModifiers modifiers = stack.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
         return (float) modifiers.modifiers().stream()

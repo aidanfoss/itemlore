@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,109 +28,164 @@ public class ItemLore implements ModInitializer {
 	public static final String MOD_ID = "itemLore";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
+	@SuppressWarnings({ "null"})
 	@Override
 	public void onInitialize() {
 		MidnightConfig.init("itemLore", itemLoreConfig.class);
 
 		LOGGER.info(MOD_ID + " Initialized");
 
-		// ApplyLore Command
+		// Itemlore Command
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-			dispatcher.register(Commands.literal("applylore")
+			dispatcher.register(Commands.literal("itemlore")
+					// Root: Apply lore or show stats if exists
 					.executes(context -> {
-						if (context.getSource().getPlayer() == null) { // not a player
-							context.getSource().sendFailure(Component.literal("Something attempted to run ApplyLore"));
-							return 1;
-						} else if (!itemLoreConfig.enabled) { // feature is disabled
-							context.getSource().getPlayer().displayClientMessage(Component.literal("ItemLore is currently disabled."),
-									false);
-							return 1;
-						} else if (context.getSource().getPlayer().getMainHandItem() == null) { // player is not
-																									// holding an item
-							context.getSource().getPlayer().displayClientMessage(Component.literal("You are not holding anything!"),
-									false);
-							return 1;
-						} else if (context.getSource().getPlayer().getMainHandItem() != null) { // player is holding
-																									// item
-							if (setLore.applyNewLore(context.getSource().getPlayer(),
-									Objects.requireNonNull(context.getSource().getPlayer()).getMainHandItem())) {
-								context.getSource().sendSystemMessage(Component.literal("Lore applied!"));
-								return 1;
-							} else {
-								context.getSource().sendSystemMessage(Component.literal("Lore already exists."));
-								return 1;
-							}
+						// feature is disabled
+						if (!itemLoreConfig.enabled) {
+							context.getSource().sendFailure(Component.literal("ItemLore is currently disabled."));
+							return 0;
 						}
-						context.getSource().sendFailure(Component.literal("Error: fell off the end of the function."));
-						context.getSource().getPlayer().displayClientMessage(Component.literal("lore application attempted"), false);
-						context.getSource().getPlayer()
-								.displayClientMessage(Component.literal(context.getSource().getPlayer().toString()), false);
-						context.getSource().getPlayer().displayClientMessage(
-								Component.literal(context.getSource().getPlayer().getMainHandItem().toString()), false);
-						return 1;
-					}));
-		});
-
-		// getComponents
-		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-			dispatcher.register(Commands.literal("getComponents")
-					.requires(source -> source.hasPermission(2))
-					.executes(context -> {
-						ItemStack stack = Objects.requireNonNull(context.getSource().getPlayer()).getMainHandItem();
-						net.minecraft.world.item.component.ItemLore loreComponent = new net.minecraft.world.item.component.ItemLore(List.of());
-						context.getSource().getPlayer()
-								.sendSystemMessage(Component.literal(stack.get(DataComponents.LORE).toString()));
-						context.getSource().getPlayer().sendSystemMessage(Component.literal(loreComponent.toString()));
-						return 0;
-					}));
-		});
-
-		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-			dispatcher.register(Commands.literal("toggleItemLore")
-					.requires(source -> source.hasPermission(2))
-					.executes(context -> {
-						itemLoreConfig.enabled = !itemLoreConfig.enabled;
-						context.getSource().sendSuccess(
-								() -> Component.literal("ItemLore Toggle set to: " + itemLoreConfig.enabled), false);
-						return 1;
-					}));
-		});
-
-		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-			dispatcher.register(Commands.literal("toggleForceLore")
-					.requires(source -> source.hasPermission(2))
-					.executes(context -> {
-						switch (itemLoreConfig.forceLoreMode) {
-							case OFF:
-								itemLoreConfig.forceLoreMode = itemLoreConfig.ForceLoreMode.UNSTACKABLE;
-								break;
-							case UNSTACKABLE:
-								itemLoreConfig.forceLoreMode = itemLoreConfig.ForceLoreMode.ALL;
-								break;
-							case ALL:
-								itemLoreConfig.forceLoreMode = itemLoreConfig.ForceLoreMode.OFF;
-								break;
+						//player doesnt exist
+						var player = context.getSource().getPlayer();
+						if (player == null)
+							return 0;
+						
+						//item not in hand
+						ItemStack stack = player.getMainHandItem();
+						if (stack.isEmpty()) {
+							context.getSource().sendFailure(Component.literal("You must be holding an item."));
+							return 0;
 						}
-						context.getSource().sendSuccess(
-								() -> Component.literal("ForceLore Mode set to: " + itemLoreConfig.forceLoreMode), false);
-						return 1;
-					}));
-		});
 
-		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-			dispatcher.register(Commands.literal("stats")
-					.executes(context -> handleStatsCommand(context, StatMode.DEFAULT))
-					.then(Commands.literal("all")
-							.executes(context -> handleStatsCommand(context, StatMode.ALL)))
-					.then(Commands.literal("blocks")
-							.executes(context -> handleStatsCommand(context, StatMode.BLOCKS)))
-					.then(Commands.literal("mobs")
-							.executes(context -> handleStatsCommand(context, StatMode.MOBS))));
+						// Try to apply lore
+						if (setLore.applyNewLore(player, stack)) {
+							context.getSource().sendSuccess(() -> Component.literal("Lore applied!"), false);
+							return 1;
+						} else {
+							// Lore exists, show all stats
+							return handleStatsCommand(context, StatMode.ALL);
+						}
+					})
+
+					// /itemlore apply
+					.then(Commands.literal("apply")
+							.executes(context -> {
+								if (!itemLoreConfig.enabled) {
+									context.getSource()
+											.sendFailure(Component.literal("ItemLore is currently disabled."));
+									return 0;
+								}
+								var player = context.getSource().getPlayer();
+								if (player == null)
+									return 0;
+								if (setLore.applyNewLore(player, player.getMainHandItem())) {
+									context.getSource().sendSuccess(() -> Component.literal("Lore applied!"), false);
+								} else {
+									context.getSource().sendFailure(Component.literal("Lore already exists."));
+								}
+								return 1;
+							}))
+
+					// /itemlore stats {all,kills,blocks}
+					.then(Commands.literal("stats")
+							.executes(context -> handleStatsCommand(context, StatMode.DEFAULT))
+							.then(Commands.literal("all")
+									.executes(context -> handleStatsCommand(context, StatMode.ALL)))
+							.then(Commands.literal("kills")
+									.executes(context -> handleStatsCommand(context, StatMode.MOBS)))
+							.then(Commands.literal("blocks")
+									.executes(context -> handleStatsCommand(context, StatMode.BLOCKS))))
+
+					// /itemlore forceLore {all, nonstackables, off}
+					.then(Commands.literal("forceLore")
+							.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+							.executes(context -> {
+								switch (itemLoreConfig.forceLoreMode) {
+									case OFF:
+										itemLoreConfig.forceLoreMode = itemLoreConfig.ForceLoreMode.UNSTACKABLE;
+										break;
+									case UNSTACKABLE:
+										itemLoreConfig.forceLoreMode = itemLoreConfig.ForceLoreMode.ALL;
+										break;
+									case ALL:
+										itemLoreConfig.forceLoreMode = itemLoreConfig.ForceLoreMode.OFF;
+										break;
+								}
+								context.getSource().sendSuccess(() -> Component.literal(
+										"ForceLore Mode set to: " + itemLoreConfig.forceLoreMode), false);
+								return 1;
+							})
+							.then(Commands.literal("all")
+									.executes(context -> setForceLore(context, itemLoreConfig.ForceLoreMode.ALL)))
+							.then(Commands.literal("nonstackables").executes(
+									context -> setForceLore(context, itemLoreConfig.ForceLoreMode.UNSTACKABLE)))
+							.then(Commands.literal("off")
+									.executes(context -> setForceLore(context, itemLoreConfig.ForceLoreMode.OFF))))
+
+					// /itemlore toggle {on/true, off/false}
+					.then(Commands.literal("toggle")
+							.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+							.executes(context -> {
+								itemLoreConfig.enabled = !itemLoreConfig.enabled;
+								context.getSource().sendSuccess(
+										() -> Component.literal("ItemLore enabled: " + itemLoreConfig.enabled), false);
+								return 1;
+							})
+							.then(Commands.literal("on").executes(context -> setEnabled(context, true)))
+							.then(Commands.literal("true").executes(context -> setEnabled(context, true)))
+							.then(Commands.literal("off").executes(context -> setEnabled(context, false)))
+							.then(Commands.literal("false").executes(context -> setEnabled(context, false))))
+
+					// /itemlore remove
+					.then(Commands.literal("remove")
+							.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+							.executes(context -> {
+								var player = context.getSource().getPlayer();
+								if (player == null)
+									return 0;
+								ItemStack stack = player.getMainHandItem();
+								if (!stack.isEmpty()) {
+									// Remove lore component
+									stack.set(DataComponents.LORE,
+											new net.minecraft.world.item.component.ItemLore(List.of()));
+									context.getSource().sendSuccess(() -> Component.literal("Lore removed."), true);
+									return 1;
+								}
+								context.getSource().sendFailure(Component.literal("Hold an item."));
+								return 0;
+							}))
+
+					// /itemlore debug
+					.then(Commands.literal("debug")
+							.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+							.executes(context -> {
+								var player = context.getSource().getPlayer();
+								if (player == null)
+									return 0;
+								ItemStack stack = player.getMainHandItem();
+								context.getSource().sendSystemMessage(
+										Component.literal("Lore Component: " + stack.get(DataComponents.LORE)));
+								return 1;
+							})));
 		});
 	}
 
 	private enum StatMode {
 		DEFAULT, ALL, BLOCKS, MOBS
+	}
+
+	private static int setForceLore(CommandContext<CommandSourceStack> context, itemLoreConfig.ForceLoreMode mode) {
+		itemLoreConfig.forceLoreMode = mode;
+		context.getSource().sendSuccess(
+				() -> Component.literal("ForceLore Mode set to: " + itemLoreConfig.forceLoreMode),
+				false);
+		return 1;
+	}
+
+	private static int setEnabled(CommandContext<CommandSourceStack> context, boolean enabled) {
+		itemLoreConfig.enabled = enabled;
+		context.getSource().sendSuccess(() -> Component.literal("ItemLore enabled: " + itemLoreConfig.enabled), false);
+		return 1;
 	}
 
 	private static String formatName(String key) {
