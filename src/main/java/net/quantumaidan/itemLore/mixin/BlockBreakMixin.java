@@ -35,9 +35,7 @@ public class BlockBreakMixin {
     @Inject(method = "tryBreakBlock", at = @At("TAIL"))
     private void afterTryBreakBlock(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
         if (cir.getReturnValue()) {
-            if (net.quantumaidan.itemLore.config.itemLoreConfig.forceLore) {
-                net.quantumaidan.itemLore.util.setLore.applyNewLore(this.player, this.player.getMainHandStack());
-            }
+            net.quantumaidan.itemLore.util.setLore.applyForcedLore(this.player, this.player.getMainHandStack());
             statTrackLore.onBlockBrokenWithLoredTool(pos, this.lastBrokenState, this.player.getMainHandStack());
         }
     }

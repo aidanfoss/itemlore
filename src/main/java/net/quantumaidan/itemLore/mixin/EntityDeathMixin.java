@@ -17,9 +17,7 @@ public class EntityDeathMixin {
     private void onLivingDeath(DamageSource damageSource, CallbackInfo ci) {
         LivingEntity livingEntity = (LivingEntity) (Object) this;
         if (damageSource.getAttacker() instanceof ServerPlayerEntity player) {
-            if (net.quantumaidan.itemLore.config.itemLoreConfig.forceLore) {
-                net.quantumaidan.itemLore.util.setLore.applyNewLore(player, player.getMainHandStack());
-            }
+            net.quantumaidan.itemLore.util.setLore.applyForcedLore(player, player.getMainHandStack());
             statTrackLore.onEntityKilledWithLoredTool(player.getEntityWorld(), livingEntity, player.getMainHandStack());
         }
     }
