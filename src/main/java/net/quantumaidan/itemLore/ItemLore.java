@@ -31,6 +31,7 @@ public class ItemLore implements ModInitializer {
 	public static final String MOD_ID = "itemLore";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
+	@SuppressWarnings("null")
 	@Override
 	public void onInitialize() {
 		MidnightConfig.init("itemLore", itemLoreConfig.class);
@@ -41,20 +42,23 @@ public class ItemLore implements ModInitializer {
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
 			dispatcher.register(CommandManager.literal("applylore")
 					.executes(context -> {
-						if (context.getSource().getPlayer() == null) { // not a player
+						// not a player
+						if (context.getSource().getPlayer() == null) { 
 							context.getSource().sendError(Text.literal("Something attempted to run ApplyLore"));
 							return 1;
-						} else if (!itemLoreConfig.enabled) { // feature is disabled
-							context.getSource().getPlayer().sendMessage(Text.literal("ItemLore is currently disabled."),
-									false);
+
+						// feature is disabled	
+						} else if (!itemLoreConfig.enabled) { 
+							context.getSource().getPlayer().sendMessage(Text.literal("ItemLore is currently disabled."), false);
 							return 1;
-						} else if (context.getSource().getPlayer().getMainHandStack() == null) { // player is not
-																									// holding an item
-							context.getSource().getPlayer().sendMessage(Text.literal("You are not holding anything!"),
-									false);
+
+						// player is not holding an item
+						} else if (context.getSource().getPlayer().getMainHandStack() == null) { 
+							context.getSource().getPlayer().sendMessage(Text.literal("You are not holding anything!"), false);
 							return 1;
-						} else if (context.getSource().getPlayer().getMainHandStack() != null) { // player is holding
-																									// item
+
+						// player is holding item
+						} else if (context.getSource().getPlayer().getMainHandStack() != null) { 
 							if (setLore.applyNewLore(context.getSource().getPlayer(),
 									Objects.requireNonNull(context.getSource().getPlayer()).getMainHandStack())) {
 								context.getSource().sendMessage(Text.literal("Lore applied!"));
@@ -64,12 +68,12 @@ public class ItemLore implements ModInitializer {
 								return 1;
 							}
 						}
-						context.getSource().sendError(Text.literal("Error: fell off the end of the function."));
-						context.getSource().getPlayer().sendMessage(Text.literal("lore application attempted"), false);
-						context.getSource().getPlayer()
-								.sendMessage(Text.literal(context.getSource().getPlayer().toString()), false);
-						context.getSource().getPlayer().sendMessage(
-								Text.literal(context.getSource().getPlayer().getMainHandStack().toString()), false);
+						context.getSource().sendError(Text.literal("Error: fell off the end of the function. Please report this to the mod author."));
+						// context.getSource().getPlayer().sendMessage(Text.literal("lore application attempted"), false);
+						// context.getSource().getPlayer()
+						// 		.sendMessage(Text.literal(context.getSource().getPlayer().toString()), false);
+						// context.getSource().getPlayer().sendMessage(
+						// 		Text.literal(context.getSource().getPlayer().getMainHandStack().toString()), false);
 						return 1;
 					}));
 		});
@@ -77,7 +81,7 @@ public class ItemLore implements ModInitializer {
 		// getComponents
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
 			dispatcher.register(CommandManager.literal("getComponents")
-					.requires(source -> Permissions.hasPermission(source, 2))
+					// .requires((iCommandSender) -> iCommandSender.permissions().hasPermission(Permissions.COMMANDS_ADMIN))
 					.executes(context -> {
 						ItemStack stack = Objects.requireNonNull(context.getSource().getPlayer()).getMainHandStack();
 						LoreComponent loreComponent = new LoreComponent(List.of());
@@ -90,7 +94,7 @@ public class ItemLore implements ModInitializer {
 
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
 			dispatcher.register(CommandManager.literal("toggleItemLore")
-					.requires(source -> source.hasPermissionLevel(2))
+					// .requires(source -> source.hasPermissionLevel(2))
 					.executes(context -> {
 						itemLoreConfig.enabled = !itemLoreConfig.enabled;
 						context.getSource().sendFeedback(
@@ -101,7 +105,7 @@ public class ItemLore implements ModInitializer {
 
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
 			dispatcher.register(CommandManager.literal("toggleForceLore")
-					.requires(source -> source.hasPermissionLevel(2))
+					// .requires(source -> source.hasPermissionLevel(2))
 					.executes(context -> {
 						switch (itemLoreConfig.forceLoreMode) {
 							case OFF:
