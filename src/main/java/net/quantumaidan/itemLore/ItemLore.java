@@ -1,17 +1,6 @@
 package net.quantumaidan.itemLore;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.mojang.brigadier.context.CommandContext;
-
 import eu.midnightdust.lib.config.MidnightConfig;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -25,6 +14,14 @@ import net.minecraft.util.Formatting;
 import net.quantumaidan.itemLore.config.itemLoreConfig;
 import net.quantumaidan.itemLore.util.setLore;
 import net.quantumaidan.itemLore.util.statTrackLore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ItemLore implements ModInitializer {
 	public static final String MOD_ID = "itemLore";
@@ -33,96 +30,152 @@ public class ItemLore implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		MidnightConfig.init("itemLore", itemLoreConfig.class);
-
 		LOGGER.info(MOD_ID + " Initialized");
 
-		// ApplyLore Command
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-			dispatcher.register(CommandManager.literal("applylore")
-					.executes(context -> {
-						if (context.getSource().getPlayer() == null) { // not a player
-							context.getSource().sendError(Text.literal("Something attempted to run ApplyLore"));
-							return 1;
-						} else if (!itemLoreConfig.enabled) { // feature is disabled
-							context.getSource().getPlayer().sendMessage(Text.literal("ItemLore is currently disabled."),
-									false);
-							return 1;
-						} else if (context.getSource().getPlayer().getMainHandStack() == null) { // player is not
-																									// holding an item
-							context.getSource().getPlayer().sendMessage(Text.literal("You are not holding anything!"),
-									false);
-							return 1;
-						} else if (context.getSource().getPlayer().getMainHandStack() != null) { // player is holding
-																									// item
-							if (setLore.applyNewLore(context.getSource().getPlayer(),
-									Objects.requireNonNull(context.getSource().getPlayer()).getMainHandStack())) {
-								context.getSource().sendMessage(Text.literal("Lore applied!"));
-								return 1;
-							} else {
-								context.getSource().sendMessage(Text.literal("Lore already exists."));
-								return 1;
-							}
-						}
-						context.getSource().sendError(Text.literal("Error: fell off the end of the function."));
-						context.getSource().getPlayer().sendMessage(Text.literal("lore application attempted"), false);
-						context.getSource().getPlayer()
-								.sendMessage(Text.literal(context.getSource().getPlayer().toString()), false);
-						context.getSource().getPlayer().sendMessage(
-								Text.literal(context.getSource().getPlayer().getMainHandStack().toString()), false);
-						return 1;
-					}));
-		});
+			dispatcher.register(CommandManager.literal("itemlore") // Root command: /itemlore
+					.executes(ItemLore::handleRootCommand) // Executes when just /itemlore is typed
 
-		// getComponents
-		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-			dispatcher.register(CommandManager.literal("getComponents")
-					.requires(source -> source.hasPermissionLevel(2))
-					.executes(context -> {
-						ItemStack stack = Objects.requireNonNull(context.getSource().getPlayer()).getMainHandStack();
-						LoreComponent loreComponent = new LoreComponent(List.of());
-						context.getSource().getPlayer()
-								.sendMessage(Text.literal(stack.get(DataComponentTypes.LORE).toString()));
-						context.getSource().getPlayer().sendMessage(Text.literal(loreComponent.toString()));
-						return 0;
-					}));
-		});
+					// Subcommand: /itemlore apply
+					.then(CommandManager.literal("apply")
+							.executes(ItemLore::handleApplyCommand))
 
-		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-			dispatcher.register(CommandManager.literal("toggleItemLore")
-					.requires(source -> source.hasPermissionLevel(2))
-					.executes(context -> {
-						itemLoreConfig.enabled = !itemLoreConfig.enabled;
-						context.getSource().sendFeedback(
-								() -> Text.literal("ItemLore Toggle set to: " + itemLoreConfig.enabled), false);
-						return 1;
-					}));
-		});
+					// Subcommand: /itemlore stats {all,kills,blocks}
+					.then(CommandManager.literal("stats")
+							.executes(context -> handleStatsCommand(context, StatMode.DEFAULT))
+							.then(CommandManager.literal("all")
+									.executes(context -> handleStatsCommand(context, StatMode.ALL)))
+							.then(CommandManager.literal("kills")
+									.executes(context -> handleStatsCommand(context, StatMode.MOBS)))
+							.then(CommandManager.literal("blocks")
+									.executes(context -> handleStatsCommand(context, StatMode.BLOCKS))))
 
-		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-			dispatcher.register(CommandManager.literal("toggleForceLore")
-					.requires(source -> source.hasPermissionLevel(2))
-					.executes(context -> {
-						itemLoreConfig.forceLore = !itemLoreConfig.forceLore;
-						context.getSource().sendFeedback(
-								() -> Text.literal("ForceLore Toggle set to: " + itemLoreConfig.forceLore), false);
-						return 1;
-					}));
-		});
+					// Subcommand: /itemlore forceLore {on, off}
+					.then(CommandManager.literal("forceLore")
+							.requires(source -> source.hasPermissionLevel(2)) // Requires op level 2
+							.executes(ItemLore::handleForceLoreToggleCommand) // Toggles between modes
+							.then(CommandManager.literal("on")
+									.executes(context -> setForceLore(context, true)))
+							.then(CommandManager.literal("off")
+									.executes(context -> setForceLore(context, false))))
 
-		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-			dispatcher.register(CommandManager.literal("stats")
-					.executes(context -> handleStatsCommand(context, StatMode.DEFAULT))
-					.then(CommandManager.literal("all")
-							.executes(context -> handleStatsCommand(context, StatMode.ALL)))
-					.then(CommandManager.literal("blocks")
-							.executes(context -> handleStatsCommand(context, StatMode.BLOCKS)))
-					.then(CommandManager.literal("mobs")
-							.executes(context -> handleStatsCommand(context, StatMode.MOBS))));
+					// Subcommand: /itemlore toggle {on/true, off/false}
+					.then(CommandManager.literal("toggle")
+							.requires(source -> source.hasPermissionLevel(2)) // Requires op level 2
+							.executes(ItemLore::handleToggleCommand) // Toggles enabled state
+							.then(CommandManager.literal("on").executes(context -> setEnabled(context, true)))
+							.then(CommandManager.literal("true").executes(context -> setEnabled(context, true)))
+							.then(CommandManager.literal("off").executes(context -> setEnabled(context, false)))
+							.then(CommandManager.literal("false").executes(context -> setEnabled(context, false))))
+
+					// Subcommand: /itemlore remove
+					.then(CommandManager.literal("remove")
+							.requires(source -> source.hasPermissionLevel(2)) // Requires op level 2
+							.executes(ItemLore::handleRemoveCommand))
+
+					// Subcommand: /itemlore debug
+					.then(CommandManager.literal("debug")
+							.requires(source -> source.hasPermissionLevel(2)) // Requires op level 2
+							.executes(ItemLore::handleDebugCommand)));
 		});
 	}
 
 	private enum StatMode {
 		DEFAULT, ALL, BLOCKS, MOBS
+	}
+
+	// Command Handlers
+
+	private static int handleRootCommand(CommandContext<ServerCommandSource> context) {
+		if (!itemLoreConfig.enabled) {
+			context.getSource().sendError(Text.literal("ItemLore is currently disabled."));
+			return 0;
+		}
+		var player = context.getSource().getPlayer();
+		if (player == null) return 0;
+
+		ItemStack stack = player.getMainHandStack();
+		if (stack.isEmpty()) {
+			context.getSource().sendError(Text.literal("You must be holding an item."));
+			return 0;
+		}
+
+		if (setLore.applyNewLore(player, stack)) {
+			context.getSource().sendFeedback(() -> Text.literal("Lore applied!"), false);
+			return 1;
+		} else {
+			return handleStatsCommand(context, StatMode.ALL);
+		}
+	}
+
+	private static int handleApplyCommand(CommandContext<ServerCommandSource> context) {
+		if (!itemLoreConfig.enabled) {
+			context.getSource().sendError(Text.literal("ItemLore is currently disabled."));
+			return 0;
+		}
+		var player = context.getSource().getPlayer();
+		if (player == null) return 0;
+
+		if (setLore.applyNewLore(player, player.getMainHandStack())) {
+			context.getSource().sendFeedback(() -> Text.literal("Lore applied!"), false);
+		} else {
+			context.getSource().sendError(Text.literal("Lore already exists."));
+		}
+		return 1;
+	}
+
+	private static int handleForceLoreToggleCommand(CommandContext<ServerCommandSource> context) {
+		itemLoreConfig.forceLore = !itemLoreConfig.forceLore;
+		context.getSource().sendFeedback(() -> Text.literal(
+				"ForceLore Mode set to: " + (itemLoreConfig.forceLore ? "ON" : "OFF")), false);
+		MidnightConfig.write("itemLore");
+		return 1;
+	}
+
+	private static int handleToggleCommand(CommandContext<ServerCommandSource> context) {
+		itemLoreConfig.enabled = !itemLoreConfig.enabled;
+		context.getSource().sendFeedback(
+				() -> Text.literal("ItemLore enabled: " + itemLoreConfig.enabled), false);
+		MidnightConfig.write("itemLore");
+		return 1;
+	}
+
+	private static int handleRemoveCommand(CommandContext<ServerCommandSource> context) {
+		var player = context.getSource().getPlayer();
+		if (player == null) return 0;
+		ItemStack stack = player.getMainHandStack();
+		if (!stack.isEmpty()) {
+			stack.set(DataComponentTypes.LORE, new LoreComponent(List.of()));
+			context.getSource().sendFeedback(() -> Text.literal("Lore removed."), true);
+			return 1;
+		}
+		context.getSource().sendError(Text.literal("Hold an item."));
+		return 0;
+	}
+
+	private static int handleDebugCommand(CommandContext<ServerCommandSource> context) {
+		var player = context.getSource().getPlayer();
+		if (player == null) return 0;
+		ItemStack stack = player.getMainHandStack();
+		context.getSource().sendFeedback(
+				() -> Text.literal("Lore Component: " + stack.get(DataComponentTypes.LORE)), false);
+		return 1;
+	}
+
+	private static int setForceLore(CommandContext<ServerCommandSource> context, boolean enabled) {
+		itemLoreConfig.forceLore = enabled;
+		context.getSource().sendFeedback(
+				() -> Text.literal("ForceLore Mode set to: " + (itemLoreConfig.forceLore ? "ON" : "OFF")),
+				false);
+		MidnightConfig.write("itemLore");
+		return 1;
+	}
+
+	private static int setEnabled(CommandContext<ServerCommandSource> context, boolean enabled) {
+		itemLoreConfig.enabled = enabled;
+		context.getSource().sendFeedback(() -> Text.literal("ItemLore enabled: " + itemLoreConfig.enabled), false);
+		MidnightConfig.write("itemLore");
+		return 1;
 	}
 
 	private static String formatName(String key) {
@@ -243,14 +296,3 @@ public class ItemLore implements ModInitializer {
 		return 1;
 	}
 }
-// to move the custom commands to a util folder, you would need to define
-// everything the function does there, and initialize it into the
-// commandregistration register here.
-// or, in other words split it up a lot. might be nice if a lot of these are
-// added.
-
-// to move the custom commands to a util folder, you would need to define
-// everything the function does there, and initialize it into the
-// commandregistration register here.
-// or, in other words split it up a lot. might be nice if a lot of these are
-// added.
