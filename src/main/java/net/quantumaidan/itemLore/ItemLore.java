@@ -50,14 +50,16 @@ public class ItemLore implements ModInitializer {
 							.then(CommandManager.literal("blocks")
 									.executes(context -> handleStatsCommand(context, StatMode.BLOCKS))))
 
-					// Subcommand: /itemlore forceLore {on, off}
+					// Subcommand: /itemlore forceLore {all, nonstackables, off}
 					.then(CommandManager.literal("forceLore")
 							.requires(source -> source.hasPermissionLevel(2)) // Requires op level 2
 							.executes(ItemLore::handleForceLoreToggleCommand) // Toggles between modes
-							.then(CommandManager.literal("on")
-									.executes(context -> setForceLore(context, true)))
+							.then(CommandManager.literal("all")
+									.executes(context -> setForceLore(context, itemLoreConfig.ForceLoreMode.ALL)))
+							.then(CommandManager.literal("nonstackables")
+									.executes(context -> setForceLore(context, itemLoreConfig.ForceLoreMode.UNSTACKABLE)))
 							.then(CommandManager.literal("off")
-									.executes(context -> setForceLore(context, false))))
+									.executes(context -> setForceLore(context, itemLoreConfig.ForceLoreMode.OFF))))
 
 					// Subcommand: /itemlore toggle {on/true, off/false}
 					.then(CommandManager.literal("toggle")
@@ -125,9 +127,19 @@ public class ItemLore implements ModInitializer {
 	}
 
 	private static int handleForceLoreToggleCommand(CommandContext<ServerCommandSource> context) {
-		itemLoreConfig.forceLore = !itemLoreConfig.forceLore;
+		switch (itemLoreConfig.forceLoreMode) {
+			case OFF:
+				itemLoreConfig.forceLoreMode = itemLoreConfig.ForceLoreMode.UNSTACKABLE;
+				break;
+			case UNSTACKABLE:
+				itemLoreConfig.forceLoreMode = itemLoreConfig.ForceLoreMode.ALL;
+				break;
+			case ALL:
+				itemLoreConfig.forceLoreMode = itemLoreConfig.ForceLoreMode.OFF;
+				break;
+		}
 		context.getSource().sendFeedback(() -> Text.literal(
-				"ForceLore Mode set to: " + (itemLoreConfig.forceLore ? "ON" : "OFF")), false);
+				"ForceLore Mode set to: " + itemLoreConfig.forceLoreMode), false);
 		MidnightConfig.write("itemLore");
 		return 1;
 	}
@@ -162,10 +174,10 @@ public class ItemLore implements ModInitializer {
 		return 1;
 	}
 
-	private static int setForceLore(CommandContext<ServerCommandSource> context, boolean enabled) {
-		itemLoreConfig.forceLore = enabled;
+	private static int setForceLore(CommandContext<ServerCommandSource> context, itemLoreConfig.ForceLoreMode mode) {
+		itemLoreConfig.forceLoreMode = mode;
 		context.getSource().sendFeedback(
-				() -> Text.literal("ForceLore Mode set to: " + (itemLoreConfig.forceLore ? "ON" : "OFF")),
+				() -> Text.literal("ForceLore Mode set to: " + itemLoreConfig.forceLoreMode),
 				false);
 		MidnightConfig.write("itemLore");
 		return 1;

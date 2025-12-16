@@ -3,11 +3,16 @@ package net.quantumaidan.itemLore.config;
 import eu.midnightdust.lib.config.MidnightConfig;
 
 public class itemLoreConfig extends MidnightConfig {
+    public enum ForceLoreMode {
+        OFF,
+        UNSTACKABLE,
+        ALL
+    }
     @Entry(name = "Toggle")
     public static boolean enabled = true;
 
     @Entry(name = "Force Lore")
-    public static boolean forceLore = false;
+    public static ForceLoreMode forceLoreMode = ForceLoreMode.OFF;
 
     @Comment(name = "Defaults if input is nonsense", centered = true)
     public static String comment1;
