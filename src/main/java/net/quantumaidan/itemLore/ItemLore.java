@@ -145,6 +145,7 @@ public class ItemLore implements ModInitializer {
 		}
 		context.getSource().sendSuccess(() -> Component.literal(
 				"ForceLore Mode set to: " + itemLoreConfig.forceLoreMode), false);
+		MidnightConfig.write("itemLore");
 		return 1;
 	}
 
@@ -152,6 +153,7 @@ public class ItemLore implements ModInitializer {
 		itemLoreConfig.enabled = !itemLoreConfig.enabled;
 		context.getSource().sendSuccess(
 				() -> Component.literal("ItemLore enabled: " + itemLoreConfig.enabled), false);
+		MidnightConfig.write("itemLore");
 		return 1;
 	}
 
@@ -182,12 +184,14 @@ public class ItemLore implements ModInitializer {
 		context.getSource().sendSuccess(
 				() -> Component.literal("ForceLore Mode set to: " + itemLoreConfig.forceLoreMode),
 				false);
+		MidnightConfig.write("itemLore");
 		return 1;
 	}
 
 	private static int setEnabled(CommandContext<CommandSourceStack> context, boolean enabled) {
 		itemLoreConfig.enabled = enabled;
 		context.getSource().sendSuccess(() -> Component.literal("ItemLore enabled: " + itemLoreConfig.enabled), false);
+		MidnightConfig.write("itemLore");
 		return 1;
 	}
 
@@ -309,14 +313,3 @@ public class ItemLore implements ModInitializer {
 		return 1;
 	}
 }
-// to move the custom commands to a util folder, you would need to define
-// everything the function does there, and initialize it into the
-// commandregistration register here.
-// or, in other words split it up a lot. might be nice if a lot of these are
-// added.
-
-// to move the custom commands to a util folder, you would need to define
-// everything the function does there, and initialize it into the
-// commandregistration register here.
-// or, in other words split it up a lot. might be nice if a lot of these are
-// added.
