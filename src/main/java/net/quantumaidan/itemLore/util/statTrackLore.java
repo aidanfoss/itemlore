@@ -88,8 +88,7 @@ public class statTrackLore {
         if (parts.length == 0)
             return null;
         String last = parts[parts.length - 1];
-        if ("pickaxe".equals(last) || "axe".equals(last) || "shovel".equals(last) || "hoe".equals(last)
-                || "sword".equals(last) || "bow".equals(last) || "crossbow".equals(last)) {
+        if ("pickaxe".equals(last) || "axe".equals(last) || "shovel".equals(last) || "hoe".equals(last) || "sword".equals(last) || "bow".equals(last) || "crossbow".equals(last)) {
             return last;
         }
         return null;
