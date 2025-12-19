@@ -95,7 +95,15 @@ public class ItemLoreTest {
 
         // Create Diamond Sword
         ItemStack swordStack = new ItemStack(Items.DIAMOND_SWORD);
+
+        // Enchant with Sweeping Edge (Level 3)
+        var registries = context.getLevel().registryAccess();
+        var enchantments = registries.lookupOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT);
+        var sweepingEdge = enchantments.getOrThrow(net.minecraft.world.item.enchantment.Enchantments.SWEEPING_EDGE);
+        swordStack.enchant(sweepingEdge, 3);
+
         player.setItemInHand(InteractionHand.MAIN_HAND, swordStack);
+        player.setOnGround(true);
 
         // Apply initial Lore so the mod tracks stats
         net.quantumaidan.itemLore.util.setLore.applyNewLore(player, swordStack);
@@ -108,12 +116,22 @@ public class ItemLoreTest {
         LivingEntity chicken3 = context.spawn(EntityType.CHICKEN, chickenPos);
         chicken3.setHealth(1.0f);
 
-        // Attack one chicken
-        player.attack(chicken1);
+        // Wait for cooldown to recharge (ensure sweeping attack works)
+        context.runAtTickTime(15, () -> {
+            // Force set damage attribute since mock player ignores item modifiers
+            player.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE).setBaseValue(10.0);
+
+            // Force tick to recharge attack strength (mock player might not be ticking)
+            for (int i = 0; i < 40; i++) {
+                player.tick();
+            }
+
+            player.lookAt(net.minecraft.commands.arguments.EntityAnchorArgument.Anchor.EYES, chicken1.position());
+            player.attack(chicken1);
+        });
 
         // Manually trigger stat tracking for any chickens that die
-        // The attack method handles damage/death, but events might not fire in tests
-        context.runAtTickTime(2, () -> {
+        context.runAtTickTime(17, () -> {
             // Check which chickens died and manually track kills
             if (!chicken1.isAlive()) {
                 net.quantumaidan.itemLore.util.statTrackLore.onEntityKilledWithLoredTool(
@@ -129,9 +147,8 @@ public class ItemLoreTest {
             }
         });
 
-        // Wait a few ticks for the attack to process, entities to die, and stats to
-        // update
-        context.runAtTickTime(5, () -> {
+        // Wait for stats to update and verify
+        context.runAtTickTime(18, () -> {
             // Verify stats
             java.util.Map<String, Integer> killStats = net.quantumaidan.itemLore.util.statTrackLore
                     .getKillStats(swordStack);
@@ -139,7 +156,8 @@ public class ItemLoreTest {
 
             // Check if we got any kills
             if (chickenKills == 0) {
-                context.fail(Component.literal("Expected kills, but found 0. Stats may not be updating correctly."),
+                context.fail(Component.literal(
+                        "Expected kills, but found 0. Stats may not be updating correctly. (Check attack connection/damage)"),
                         chickenPos);
                 return;
             }
