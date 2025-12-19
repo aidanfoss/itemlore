@@ -14,7 +14,13 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
+//? if =1.21.11 {
 import net.minecraft.resources.Identifier;
+//?} elif =1.21.10 {
+/*import net.minecraft.util.Identifier;
+*///?}
+
+
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -363,8 +369,11 @@ public class statTrackLore {
      */
     private static String getMinedKey(Block block) {
         @SuppressWarnings("null")
+        //? if >=1.21.10 {
         Identifier id = BuiltInRegistries.BLOCK.getKey(block);
         String name = id.getPath();
+        //?}
+
         // Capitalize the path
         return name.substring(0, 1).toUpperCase() + name.substring(1);
     }
