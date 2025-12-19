@@ -1,1 +1,0 @@
-added stat tracking to each lored item.
