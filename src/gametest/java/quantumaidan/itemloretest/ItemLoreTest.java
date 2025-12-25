@@ -47,8 +47,8 @@ public class ItemLoreTest {
         context.getLevel().destroyBlock(absolutePos, true, player);
 
         // Manually trigger the stat tracking that would normally happen via events
-        net.quantumaidan.itemLore.util.statTrackLore.onBlockBrokenWithLoredTool(
-                absolutePos, blockState, pickaxeStack);
+        net.quantumaidan.itemLore.util.statTrackLore.onBlockBrokenWithTool(
+                null, blockState, pickaxeStack);
 
         // Wait a few ticks for the block break to process and stats to update
         context.runAtTickTime(5, () -> {
