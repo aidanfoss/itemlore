@@ -17,16 +17,21 @@ import net.quantumaidan.itemLore.config.itemLoreConfig;
 
 public class setLore {
 
-    public static void applyForcedLore(Player player, ItemStack itemStack) {
+    // configured this way to allow for easier if statements ex:
+    // if (!applyForcedLore(player, itemStack)) {return; }
+    // will attempt to apply forcedlore and return if it fails
+    public static boolean applyForcedLore(Player player, ItemStack itemStack) {
         if (itemLoreConfig.forceLoreMode == itemLoreConfig.ForceLoreMode.OFF) {
-            return;
+            return false;
         }
 
         if (itemLoreConfig.forceLoreMode == itemLoreConfig.ForceLoreMode.ALL ||
                 (itemLoreConfig.forceLoreMode == itemLoreConfig.ForceLoreMode.UNSTACKABLE
                         && itemStack.getMaxStackSize() == 1)) {
             applyNewLore(player, itemStack);
+            return true;
         }
+        return false;
     }
 
     @SuppressWarnings("null")
