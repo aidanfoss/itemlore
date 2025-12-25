@@ -13,6 +13,9 @@ ItemLore is a **Fabric** mod that adds customizable lore and stat‑tracking cap
 - **Configurable** – JSON configuration for default lore templates and stat behaviours.
 - **Safe** – No data loss, no data corruption, fully vanilla-safe and can be added and removed without any issues.
 
+## Compatibility
+- **SgtVeinminer** – ItemLore tracks blocks mined by SgtVeinminer's chain destruction.
+
 ## Installation
 1. Download the latest `itemlore-*.jar` from **CurseForge** or **Modrinth**.
 2. Place the JAR into your `mods/` folder.
