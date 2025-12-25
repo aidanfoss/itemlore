@@ -11,6 +11,7 @@ import net.minecraft.stats.Stat;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.quantumaidan.itemLore.util.setLore;
 import net.quantumaidan.itemLore.util.statTrackLore;
 
 @Mixin(targets = "com.sheath.veinminer.logic.VeinMinerController")

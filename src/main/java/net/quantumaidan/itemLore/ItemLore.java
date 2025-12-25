@@ -28,7 +28,7 @@ public class ItemLore implements ModInitializer {
     public static final String MOD_ID = "itemLore";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
-    @SuppressWarnings({ "null"})
+    @SuppressWarnings({ "null" })
     @Override
     public void onInitialize() {
         MidnightConfig.init("itemLore", itemLoreConfig.class);
@@ -45,12 +45,12 @@ public class ItemLore implements ModInitializer {
                             context.getSource().sendFailure(Component.literal("ItemLore is currently disabled."));
                             return 0;
                         }
-                        //player doesnt exist
+                        // player doesnt exist
                         var player = context.getSource().getPlayer();
                         if (player == null)
                             return 0;
 
-                        //item not in hand
+                        // item not in hand
                         ItemStack stack = player.getMainHandItem();
                         if (stack.isEmpty()) {
                             context.getSource().sendFailure(Component.literal("You must be holding an item."));
@@ -111,6 +111,7 @@ public class ItemLore implements ModInitializer {
                                         itemLoreConfig.forceLoreMode = itemLoreConfig.ForceLoreMode.OFF;
                                         break;
                                 }
+                                itemLoreConfig.write("itemLore");
                                 context.getSource().sendSuccess(() -> Component.literal(
                                         "ForceLore Mode set to: " + itemLoreConfig.forceLoreMode), false);
                                 return 1;
@@ -127,6 +128,7 @@ public class ItemLore implements ModInitializer {
                             .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                             .executes(context -> {
                                 itemLoreConfig.enabled = !itemLoreConfig.enabled;
+                                itemLoreConfig.write("itemLore");
                                 context.getSource().sendSuccess(
                                         () -> Component.literal("ItemLore enabled: " + itemLoreConfig.enabled), false);
                                 return 1;
@@ -176,6 +178,7 @@ public class ItemLore implements ModInitializer {
 
     private static int setForceLore(CommandContext<CommandSourceStack> context, itemLoreConfig.ForceLoreMode mode) {
         itemLoreConfig.forceLoreMode = mode;
+        itemLoreConfig.write("itemLore");
         context.getSource().sendSuccess(
                 () -> Component.literal("ForceLore Mode set to: " + itemLoreConfig.forceLoreMode),
                 false);
@@ -184,6 +187,7 @@ public class ItemLore implements ModInitializer {
 
     private static int setEnabled(CommandContext<CommandSourceStack> context, boolean enabled) {
         itemLoreConfig.enabled = enabled;
+        itemLoreConfig.write("itemLore");
         context.getSource().sendSuccess(() -> Component.literal("ItemLore enabled: " + itemLoreConfig.enabled), false);
         return 1;
     }
@@ -255,8 +259,10 @@ public class ItemLore implements ModInitializer {
                 totalText = "Total Blocks: " + total;
             } else if (statTrackLore.isAttackTool(tool.getItem())) {
                 total = killStats.values().stream().mapToInt(Integer::intValue).sum();
-                player.displayClientMessage(Component.literal("=== Combat Stats ===").withStyle(ChatFormatting.GOLD), false);
-                player.displayClientMessage(Component.literal("Total Kills: " + total).withStyle(ChatFormatting.AQUA), false);
+                player.displayClientMessage(Component.literal("=== Combat Stats ===").withStyle(ChatFormatting.GOLD),
+                        false);
+                player.displayClientMessage(Component.literal("Total Kills: " + total).withStyle(ChatFormatting.AQUA),
+                        false);
                 return 1;
             } else {
                 player.displayClientMessage(Component.literal("No specific stats to show."), false);
@@ -267,31 +273,38 @@ public class ItemLore implements ModInitializer {
         if (mode == StatMode.ALL) {
             // Display blocks and mobs separately
             if (!miningStats.isEmpty()) {
-                player.displayClientMessage(Component.literal("=== Block Stats ===").withStyle(ChatFormatting.GOLD), false);
+                player.displayClientMessage(Component.literal("=== Block Stats ===").withStyle(ChatFormatting.GOLD),
+                        false);
                 List<String> keys = new ArrayList<>(miningStats.keySet());
                 keys.sort(String.CASE_INSENSITIVE_ORDER);
                 for (String key : keys) {
                     int count = miningStats.get(key);
-                    player.displayClientMessage(Component.literal(formatName(key) + ": " + count).withStyle(ChatFormatting.AQUA), false);
+                    player.displayClientMessage(
+                            Component.literal(formatName(key) + ": " + count).withStyle(ChatFormatting.AQUA), false);
                 }
                 int totalBlocks = miningStats.values().stream().mapToInt(Integer::intValue).sum();
-                player.displayClientMessage(Component.literal("Total Blocks: " + totalBlocks).withStyle(ChatFormatting.YELLOW), false);
+                player.displayClientMessage(
+                        Component.literal("Total Blocks: " + totalBlocks).withStyle(ChatFormatting.YELLOW), false);
             }
             if (!killStats.isEmpty()) {
-                player.displayClientMessage(Component.literal("=== Mob Stats ===").withStyle(ChatFormatting.GOLD), false);
+                player.displayClientMessage(Component.literal("=== Mob Stats ===").withStyle(ChatFormatting.GOLD),
+                        false);
                 List<String> keys = new ArrayList<>(killStats.keySet());
                 keys.sort(String.CASE_INSENSITIVE_ORDER);
                 for (String key : keys) {
                     int count = killStats.get(key);
-                    player.displayClientMessage(Component.literal(formatName(key) + ": " + count).withStyle(ChatFormatting.AQUA), false);
+                    player.displayClientMessage(
+                            Component.literal(formatName(key) + ": " + count).withStyle(ChatFormatting.AQUA), false);
                 }
                 int totalMobs = killStats.values().stream().mapToInt(Integer::intValue).sum();
-                player.displayClientMessage(Component.literal("Total Kills: " + totalMobs).withStyle(ChatFormatting.YELLOW), false);
+                player.displayClientMessage(
+                        Component.literal("Total Kills: " + totalMobs).withStyle(ChatFormatting.YELLOW), false);
             }
             if (!miningStats.isEmpty() || !killStats.isEmpty()) {
                 int totalActions = miningStats.values().stream().mapToInt(Integer::intValue).sum()
                         + killStats.values().stream().mapToInt(Integer::intValue).sum();
-                player.displayClientMessage(Component.literal("Total Actions: " + totalActions).withStyle(ChatFormatting.YELLOW), false);
+                player.displayClientMessage(
+                        Component.literal("Total Actions: " + totalActions).withStyle(ChatFormatting.YELLOW), false);
             }
         } else {
             List<String> keys = new ArrayList<>(displayStats.keySet());
@@ -299,7 +312,8 @@ public class ItemLore implements ModInitializer {
             player.displayClientMessage(Component.literal(header).withStyle(ChatFormatting.GOLD), false);
             for (String key : keys) {
                 int count = displayStats.get(key);
-                player.displayClientMessage(Component.literal(formatName(key) + ": " + count).withStyle(ChatFormatting.AQUA), false);
+                player.displayClientMessage(
+                        Component.literal(formatName(key) + ": " + count).withStyle(ChatFormatting.AQUA), false);
             }
             player.displayClientMessage(Component.literal(totalText).withStyle(ChatFormatting.YELLOW), false);
         }

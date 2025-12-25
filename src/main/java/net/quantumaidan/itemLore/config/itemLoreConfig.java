@@ -7,7 +7,7 @@ public class itemLoreConfig extends MidnightConfig {
     public static boolean enabled = true;
 
     @Entry(name = "Force Lore Mode")
-    public static ForceLoreMode forceLoreMode = ForceLoreMode.OFF;
+    public static ForceLoreMode forceLoreMode = ForceLoreMode.UNSTACKABLE;
 
     public enum ForceLoreMode {
         ALL, UNSTACKABLE, OFF
