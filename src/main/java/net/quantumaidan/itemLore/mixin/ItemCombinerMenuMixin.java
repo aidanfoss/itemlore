@@ -16,9 +16,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(AnvilMenu.class)
-public abstract class ItemLoreMixin extends ItemCombinerMenu {
-    public ItemLoreMixin(@Nullable MenuType<?> type, int syncId, Inventory playerInventory,
-            ContainerLevelAccess context, ItemCombinerMenuSlotDefinition forgingSlotsManager) {
+public abstract class ItemCombinerMenuMixin extends ItemCombinerMenu {
+    public ItemCombinerMenuMixin(@Nullable MenuType<?> type, int syncId, Inventory playerInventory,
+                                 ContainerLevelAccess context, ItemCombinerMenuSlotDefinition forgingSlotsManager) {
         super(type, syncId, playerInventory, context, forgingSlotsManager);
     }
 
