@@ -22,6 +22,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
+//todo break this into multiple util classes
+
 public class statTrackLore {
 
     /**
@@ -165,10 +167,9 @@ public class statTrackLore {
      */
     @SuppressWarnings("null")
     public static void onBlockBrokenWithTool(ServerPlayer player, BlockState blockState, ItemStack tool) {
-        if (!hasLore(tool)) {
-            setLore.applyForcedLore(player, tool);
+        if (!setLore.applyForcedLore(player, tool)) {
             return;
-        }
+        } // attempts to apply forced lore, returns if it fails
 
         String minedKey = getMinedKey(blockState.getBlock());
 
