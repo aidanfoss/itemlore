@@ -8,12 +8,12 @@ import java.util.Map;
 import java.util.Optional;
 
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -21,7 +21,6 @@ import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.quantumaidan.itemLore.ItemLore;
 
 public class statTrackLore {
 
@@ -157,16 +156,17 @@ public class statTrackLore {
     }
 
     /**
-     * Handles when a block is broken with a tool that has lore.
+     * Handles when a block is broken with a tool.
      * Tracks mining stats and updates the item's lore.
      *
-     * @param blockPos   The position of the broken block.
+     * @param player     The player calling this
      * @param blockState The state of the broken block.
      * @param tool       The tool used to break the block.
      */
     @SuppressWarnings("null")
-    public static void onBlockBrokenWithLoredTool(BlockPos blockPos, BlockState blockState, ItemStack tool) {
+    public static void onBlockBrokenWithTool(ServerPlayer player, BlockState blockState, ItemStack tool) {
         if (!hasLore(tool)) {
+            setLore.applyForcedLore(player, tool);
             return;
         }
 
@@ -234,12 +234,6 @@ public class statTrackLore {
      * @param player          The player whose armor prevented damage.
      * @param damagePrevented The total damage prevented.
      */
-    public static void onDamagePreventedByArmor(net.minecraft.server.level.ServerPlayer player, float damagePrevented) {
-        ItemLore.LOGGER.info("[statTrackLore] onDamagePreventedByArmor called - damagePrevented: {}", damagePrevented);
-        // This method is called but currently unused since we're distributing to
-        // individual pieces
-        // Could be used for total armor stats if needed
-    }
 
     /**
      * Handles damage prevented by a specific armor piece.
@@ -249,26 +243,19 @@ public class statTrackLore {
      */
     @SuppressWarnings("null")
     public static void onArmorPiecePreventedDamage(ItemStack armorPiece, float damagePrevented) {
-        ItemLore.LOGGER.info("[statTrackLore] onArmorPiecePreventedDamage called - item: {}, damagePrevented: {}",
-                armorPiece.getHoverName().getString(), damagePrevented);
-        ItemLore.LOGGER.info("[statTrackLore] Item hasLore: {}", hasLore(armorPiece));
-
         if (!hasLore(armorPiece)) {
-            ItemLore.LOGGER.info("[statTrackLore] Item has no lore, skipping stat tracking");
             return;
         }
 
         // Retrieve or create custom data
         CustomData nbtComp = armorPiece.get(DataComponents.CUSTOM_DATA);
         CompoundTag customData = (nbtComp != null) ? nbtComp.copyTag() : new CompoundTag();
-        ItemLore.LOGGER.info("[statTrackLore] Retrieved custom data: {}", customData != null);
 
         // Get or create damage prevention stat
         Optional<CompoundTag> statsOpt = customData.getCompound("armor_stats");
         CompoundTag stats = statsOpt.orElse(new CompoundTag());
         if (statsOpt.isEmpty()) {
             customData.put("armor_stats", stats);
-            ItemLore.LOGGER.info("[statTrackLore] Created new armor_stats compound");
         }
 
         float currentPrevention = stats.getFloat("damage_prevented").orElse(0.0f);
@@ -278,14 +265,10 @@ public class statTrackLore {
         newPrevention = Math.round(newPrevention * 10.0f) / 10.0f;
         stats.putFloat("damage_prevented", newPrevention);
 
-        ItemLore.LOGGER.info("[statTrackLore] Updated damage_prevented from {} to {}", currentPrevention,
-                newPrevention);
-
         armorPiece.set(DataComponents.CUSTOM_DATA, CustomData.of(customData));
 
         // Update armor lore
         updateArmorLore(armorPiece);
-        ItemLore.LOGGER.info("[statTrackLore] Updated armor lore");
     }
 
     /**
@@ -361,11 +344,11 @@ public class statTrackLore {
      */
     private static String getMinedKey(Block block) {
         @SuppressWarnings("null")
-        //? if >=1.21.10 {
+        // ? if >=1.21.10 {
         String name = BuiltInRegistries.BLOCK.getKey(block).getPath();
         // Capitalize the path
         return name.substring(0, 1).toUpperCase() + name.substring(1);
-        //?}
+        // ?}
     }
 
     /**

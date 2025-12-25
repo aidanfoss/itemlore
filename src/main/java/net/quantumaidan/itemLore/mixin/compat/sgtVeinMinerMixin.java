@@ -11,7 +11,6 @@ import net.minecraft.stats.Stat;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.quantumaidan.itemLore.util.setLore;
 import net.quantumaidan.itemLore.util.statTrackLore;
 
 @Mixin(targets = "com.sheath.veinminer.logic.VeinMinerController")
@@ -35,7 +34,7 @@ public class sgtVeinMinerMixin {
             // Pass player position as a dummy/proxy position (it's not used for the logic
             // we need)
             if (tool != null && !tool.isEmpty()) {
-                statTrackLore.onBlockBrokenWithLoredTool(player.blockPosition(), state, tool);
+                statTrackLore.onBlockBrokenWithTool(player, state, tool);
             }
         }
     }
