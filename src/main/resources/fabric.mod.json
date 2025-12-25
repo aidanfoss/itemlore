@@ -27,7 +27,8 @@
 		"preLaunch": []
 	},
 	"mixins": [
-		"itemlore.mixins.json"
+		"itemlore.mixins.json",
+		"itemlore.compat.mixins.json"
 	],
 	"custom": {
 		"mixin": {

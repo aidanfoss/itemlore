@@ -365,8 +365,6 @@ public class statTrackLore {
         String name = BuiltInRegistries.BLOCK.getKey(block).getPath();
         // Capitalize the path
         return name.substring(0, 1).toUpperCase() + name.substring(1);
-        //?} else
-        //return name;
         //?}
     }
 
