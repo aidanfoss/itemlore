@@ -25,13 +25,13 @@ import net.quantumaidan.itemLore.util.setLore;
 import net.quantumaidan.itemLore.util.statTrackLore;
 
 public class ItemLore implements ModInitializer {
-    public static final String MOD_ID = "itemLore";
+    public static final String MOD_ID = "itemlore";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
     @SuppressWarnings({ "null" })
     @Override
     public void onInitialize() {
-        MidnightConfig.init("itemLore", itemLoreConfig.class);
+        MidnightConfig.init(MOD_ID, itemLoreConfig.class);
 
         LOGGER.info(MOD_ID + " Initialized");
 
@@ -111,7 +111,7 @@ public class ItemLore implements ModInitializer {
                                         itemLoreConfig.forceLoreMode = itemLoreConfig.ForceLoreMode.OFF;
                                         break;
                                 }
-                                itemLoreConfig.write("itemLore");
+                                itemLoreConfig.write(MOD_ID);
                                 context.getSource().sendSuccess(() -> Component.literal(
                                         "ForceLore Mode set to: " + itemLoreConfig.forceLoreMode), false);
                                 return 1;
@@ -128,7 +128,7 @@ public class ItemLore implements ModInitializer {
                             .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                             .executes(context -> {
                                 itemLoreConfig.enabled = !itemLoreConfig.enabled;
-                                itemLoreConfig.write("itemLore");
+                                itemLoreConfig.write(MOD_ID);
                                 context.getSource().sendSuccess(
                                         () -> Component.literal("ItemLore enabled: " + itemLoreConfig.enabled), false);
                                 return 1;
@@ -178,7 +178,7 @@ public class ItemLore implements ModInitializer {
 
     private static int setForceLore(CommandContext<CommandSourceStack> context, itemLoreConfig.ForceLoreMode mode) {
         itemLoreConfig.forceLoreMode = mode;
-        itemLoreConfig.write("itemLore");
+        itemLoreConfig.write(MOD_ID);
         context.getSource().sendSuccess(
                 () -> Component.literal("ForceLore Mode set to: " + itemLoreConfig.forceLoreMode),
                 false);
@@ -187,7 +187,7 @@ public class ItemLore implements ModInitializer {
 
     private static int setEnabled(CommandContext<CommandSourceStack> context, boolean enabled) {
         itemLoreConfig.enabled = enabled;
-        itemLoreConfig.write("itemLore");
+        itemLoreConfig.write(MOD_ID);
         context.getSource().sendSuccess(() -> Component.literal("ItemLore enabled: " + itemLoreConfig.enabled), false);
         return 1;
     }
