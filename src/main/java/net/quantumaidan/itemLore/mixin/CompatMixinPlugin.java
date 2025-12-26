@@ -1,12 +1,13 @@
 package net.quantumaidan.itemLore.mixin;
 
-import net.fabricmc.loader.api.FabricLoader;
+import java.util.List;
+import java.util.Set;
+
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 
-import java.util.List;
-import java.util.Set;
+import net.fabricmc.loader.api.FabricLoader;
 
 public class CompatMixinPlugin implements IMixinConfigPlugin {
 
@@ -27,6 +28,9 @@ public class CompatMixinPlugin implements IMixinConfigPlugin {
         }
         if (mixinClassName.contains("TreeHarvesterMixin")) {
             return FabricLoader.getInstance().isModLoaded("treeharvester");
+        }
+        if (mixinClassName.contains("CollectiveMixin")) {
+            return FabricLoader.getInstance().isModLoaded("collective");
         }
         return true;
     }
