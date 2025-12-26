@@ -127,7 +127,7 @@ public class ArmorStat {
                             protectionWithout, specializedProtectionWithout);
                     float contribution = totalPrevented - preventedWithout;
 
-                    statTrackLore.onArmorPiecePreventedDamage(armorStack, contribution);
+                    addStat.addArmorDamagePreventionStat(null, armorStack, contribution);
                 }
             }
         }
@@ -154,7 +154,7 @@ public class ArmorStat {
                 float protectionLevel = entry.getValue()[1];
                 float contribution = featherLevel * 3 + protectionLevel;
                 float proportionalPrevention = (contribution / totalContribution) * totalPrevented;
-                statTrackLore.onArmorPiecePreventedDamage(armorStack, proportionalPrevention);
+                addStat.addArmorDamagePreventionStat(null, armorStack, proportionalPrevention);
             }
         }
     }

@@ -19,7 +19,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
+
 import net.minecraft.world.level.block.state.BlockState;
 
 //todo break this into multiple util classes
@@ -167,29 +167,7 @@ public class statTrackLore {
      */
     @SuppressWarnings("null")
     public static void onBlockBrokenWithTool(ServerPlayer player, BlockState blockState, ItemStack tool) {
-        if (!setLore.applyForcedLore(player, tool)) {
-            return;
-        } // attempts to apply forced lore, returns if it fails
-
-        String minedKey = getMinedKey(blockState.getBlock());
-
-        // Retrieve or create custom data
-        CustomData nbtComp = tool.get(DataComponents.CUSTOM_DATA);
-        CompoundTag customData = (nbtComp != null) ? nbtComp.copyTag() : new CompoundTag();
-
-        Optional<CompoundTag> optionalStats = customData.getCompound("mining_stats");
-        CompoundTag stats = optionalStats.orElse(new CompoundTag());
-        if (optionalStats.isEmpty()) {
-            customData.put("mining_stats", stats);
-        }
-        int count = stats.getInt(minedKey).orElse(0) + 1;
-        stats.putInt(minedKey, count);
-        customData.put("mining_stats", stats);
-
-        tool.set(DataComponents.CUSTOM_DATA, CustomData.of(customData));
-
-        // Update lore with combined stats
-        updateItemLore(tool);
+        addStat.addBlockMinedStat(player, blockState.getBlock(), tool, 1);
     }
 
     /**
@@ -202,30 +180,7 @@ public class statTrackLore {
      */
     @SuppressWarnings("null")
     public static void onEntityKilledWithLoredTool(Level world, LivingEntity entity, ItemStack tool) {
-        if (!hasLore(tool)) {
-            return;
-        }
-
-        String killKey = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).getPath();
-        killKey = killKey.substring(0, 1).toUpperCase() + killKey.substring(1); // capitalize
-
-        // Retrieve or create custom data
-        CustomData nbtComp = tool.get(DataComponents.CUSTOM_DATA);
-        CompoundTag customData = (nbtComp != null) ? nbtComp.copyTag() : new CompoundTag();
-
-        Optional<CompoundTag> optionalStats = customData.getCompound("kill_stats");
-        CompoundTag stats = optionalStats.orElse(new CompoundTag());
-        if (optionalStats.isEmpty()) {
-            customData.put("kill_stats", stats);
-        }
-        int count = stats.getInt(killKey).orElse(0) + 1;
-        stats.putInt(killKey, count);
-        customData.put("kill_stats", stats);
-
-        tool.set(DataComponents.CUSTOM_DATA, CustomData.of(customData));
-
-        // Update lore with combined stats
-        updateItemLore(tool);
+        addStat.addMobKilledStat(null, entity, tool, 1);
     }
 
     /**
@@ -244,32 +199,7 @@ public class statTrackLore {
      */
     @SuppressWarnings("null")
     public static void onArmorPiecePreventedDamage(ItemStack armorPiece, float damagePrevented) {
-        if (!hasLore(armorPiece)) {
-            return;
-        }
-
-        // Retrieve or create custom data
-        CustomData nbtComp = armorPiece.get(DataComponents.CUSTOM_DATA);
-        CompoundTag customData = (nbtComp != null) ? nbtComp.copyTag() : new CompoundTag();
-
-        // Get or create damage prevention stat
-        Optional<CompoundTag> statsOpt = customData.getCompound("armor_stats");
-        CompoundTag stats = statsOpt.orElse(new CompoundTag());
-        if (statsOpt.isEmpty()) {
-            customData.put("armor_stats", stats);
-        }
-
-        float currentPrevention = stats.getFloat("damage_prevented").orElse(0.0f);
-        float newPrevention = currentPrevention + damagePrevented;
-
-        // Round to 1 decimal place for cleaner display
-        newPrevention = Math.round(newPrevention * 10.0f) / 10.0f;
-        stats.putFloat("damage_prevented", newPrevention);
-
-        armorPiece.set(DataComponents.CUSTOM_DATA, CustomData.of(customData));
-
-        // Update armor lore
-        updateArmorLore(armorPiece);
+        addStat.addArmorDamagePreventionStat(null, armorPiece, damagePrevented);
     }
 
     /**
@@ -308,7 +238,7 @@ public class statTrackLore {
      * @param armorPiece The armor item stack.
      */
     @SuppressWarnings("null")
-    private static void updateArmorLore(ItemStack armorPiece) {
+    public static void updateArmorLore(ItemStack armorPiece) {
         net.minecraft.world.item.component.ItemLore existingLore = armorPiece.get(DataComponents.LORE);
         if (existingLore == null)
             return;
@@ -337,22 +267,6 @@ public class statTrackLore {
     }
 
     /**
-     * Gets the key for the block based on its ID path.
-     * Tracks all blocks broken.
-     *
-     * @param block The block broken.
-     * @return The key for stats.
-     */
-    private static String getMinedKey(Block block) {
-        @SuppressWarnings("null")
-        // ? if >=1.21.10 {
-        String name = BuiltInRegistries.BLOCK.getKey(block).getPath();
-        // Capitalize the path
-        return name.substring(0, 1).toUpperCase() + name.substring(1);
-        // ?}
-    }
-
-    /**
      * Gets the base key for grouping in stats display.
      *
      * @param key The raw key from stats.
@@ -377,7 +291,7 @@ public class statTrackLore {
      * @param item The item stack.
      */
     @SuppressWarnings("null")
-    private static void updateItemLore(ItemStack item) {
+    public static void updateItemLore(ItemStack item) {
         net.minecraft.world.item.component.ItemLore existingLore = item.get(DataComponents.LORE);
         if (existingLore == null)
             return;
