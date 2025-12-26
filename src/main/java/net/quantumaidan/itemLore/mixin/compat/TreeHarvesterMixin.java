@@ -1,26 +1,39 @@
 package net.quantumaidan.itemLore.mixin.compat;
 
-import com.natamus.collective.functions.BlockFunctions;
-import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.Level;
-import net.quantumaidan.itemLore.util.statTrackLore;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-@Mixin(targets = "com.natamus.treeharvester.events.TreeCutEvents")
+import net.fabricmc.fabric.api.event.Event;
+import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+
+@Mixin(targets = "com.natamus.treeharvester.ModFabric")
 public class TreeHarvesterMixin {
 
-    @Redirect(method = "onTreeHarvest", at = @At(value = "INVOKE", target = "Lcom/natamus/collective/functions/BlockFunctions;dropBlock(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;)V", remap = false))
-    private static void redirectDropBlock(Level level, BlockPos pos, Level originalLevel,
-            net.minecraft.world.entity.player.Player player) {
-        // Call the original method
-        BlockFunctions.dropBlock(level, pos);
+    public static final ThreadLocal<Player> TH_PLAYER = new ThreadLocal<>();
 
-        // Add ItemLore stats logic
-        if (player instanceof ServerPlayer serverPlayer) {
-            statTrackLore.onBlockBrokenWithTool(serverPlayer, level.getBlockState(pos), serverPlayer.getMainHandItem());
+    @SuppressWarnings("unchecked")
+    @Redirect(method = "loadEvents", at = @At(value = "INVOKE", target = "Lnet/fabricmc/fabric/api/event/Event;register(Ljava/lang/Object;)V", remap = false))
+    private void redirectRegister(Event<?> event, Object listener) {
+        if (event == PlayerBlockBreakEvents.BEFORE) {
+            PlayerBlockBreakEvents.Before original = (PlayerBlockBreakEvents.Before) listener;
+            PlayerBlockBreakEvents.Before wrapper = (Level level, Player player, BlockPos pos, BlockState state,
+                    BlockEntity blockEntity) -> {
+                TH_PLAYER.set(player);
+                try {
+                    return original.beforeBlockBreak(level, player, pos, state, blockEntity);
+                } finally {
+                    TH_PLAYER.remove();
+                }
+            };
+            ((Event<PlayerBlockBreakEvents.Before>) event).register(wrapper);
+        } else {
+            ((Event<Object>) event).register(listener);
         }
     }
 }
