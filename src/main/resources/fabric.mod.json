@@ -24,7 +24,10 @@
 		"server": [],
 		"fabric-datagen": [],
 		"fabric-gametest": [],
-		"preLaunch": []
+		"preLaunch": [],
+		"modmenu": [
+			"net.quantumaidan.itemLore.compat.ModMenuIntegration"
+		]
 	},
 	"mixins": [
 		"itemlore.mixins.json",
