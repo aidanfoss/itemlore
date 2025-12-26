@@ -25,6 +25,9 @@ public class CompatMixinPlugin implements IMixinConfigPlugin {
         if (mixinClassName.contains("sgtVeinMinerMixin")) {
             return FabricLoader.getInstance().isModLoaded("veinminermod");
         }
+        if (mixinClassName.contains("TreeHarvesterMixin")) {
+            return FabricLoader.getInstance().isModLoaded("treeharvester");
+        }
         return true;
     }
 

@@ -4,7 +4,8 @@
   "compatibilityLevel": "JAVA_21",
   "refmap": "itemlore-refmap.json",
   "mixins": [
-    "sgtVeinMinerMixin"
+    "sgtVeinMinerMixin",
+    "TreeHarvesterMixin"
   ],
   "injectors": {
     "defaultRequire": 1
