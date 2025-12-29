@@ -50,6 +50,7 @@ dependencies {
     modImplementation("maven.modrinth:midnightlib:${property("deps.midnightlib")}")
     modImplementation("com.terraformersmc:modmenu:${property("deps.modmenu")}")
     modImplementation("maven.modrinth:sgtveinminer:${property("deps.sgtveinminer")}")
+    //modImplementation("maven.modrinth:treeharvester:${property("deps.treeharvester")}")
     modImplementation("net.fabricmc.fabric-api:fabric-api:${property("deps.fabric_api")}")
 
     //fapi("fabric-lifecycle-events-v1", "fabric-resource-loader-v0", "fabric-content-registries-v0", "fabric-gametest-api-v1", "fabric-command-api-v2", "fabric-item-api-v1", "fabric-events-interaction-v0", "fabric-api-base", "fabric-registry-sync-v0")

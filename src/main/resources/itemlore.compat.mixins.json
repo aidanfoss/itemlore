@@ -3,8 +3,10 @@
   "package": "net.quantumaidan.itemLore.mixin.compat",
   "compatibilityLevel": "JAVA_21",
   "refmap": "itemlore-refmap.json",
+  "plugin": "net.quantumaidan.itemLore.mixin.CompatMixinPlugin",
   "mixins": [
-    "sgtVeinMinerMixin"
+    "sgtVeinMinerMixin",
+    "TreeHarvesterMixin"
   ],
   "injectors": {
     "defaultRequire": 1
