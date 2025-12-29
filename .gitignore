@@ -39,4 +39,6 @@ replay_*.log
 *.hprof
 *.jfr
 .agent/
-*.log
+build_error.log
+build_output.txt
+
