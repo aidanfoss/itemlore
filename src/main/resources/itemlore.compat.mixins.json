@@ -1,0 +1,12 @@
+{
+  "required": false,
+  "package": "net.quantumaidan.itemLore.mixin.compat",
+  "compatibilityLevel": "JAVA_21",
+  "refmap": "itemlore-refmap.json",
+  "mixins": [
+    "sgtVeinMinerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -8,27 +8,27 @@ import java.util.Map;
 import java.util.Optional;
 
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
+
 import net.minecraft.world.level.block.state.BlockState;
-import net.quantumaidan.itemLore.ItemLore;
+
+//todo break this into multiple util classes
 
 public class statTrackLore {
 
     /**
      * Checks if an ItemStack has lore.
-     * 
+     *
      * @param itemStack The item stack to check.
      * @return true if the item has lore, false otherwise.
      */
@@ -42,7 +42,7 @@ public class statTrackLore {
 
     /**
      * Gets the mining stats for a tool.
-     * 
+     *
      * @param tool The tool item stack.
      * @return A map of block types to mined counts.
      */
@@ -72,7 +72,7 @@ public class statTrackLore {
 
     /**
      * Gets the item type.
-     * 
+     *
      * @param item The tool item.
      * @return The item type: "pickaxe", "axe", "shovel", "hoe", "sword", "bow", or
      *         null if not a tool.
@@ -82,8 +82,7 @@ public class statTrackLore {
             return null;
         }
 
-        Identifier id = BuiltInRegistries.ITEM.getKey(item);
-        String path = id.getPath();
+        String path = BuiltInRegistries.ITEM.getKey(item).getPath();
         String[] parts = path.split("_");
         if (parts.length == 0)
             return null;
@@ -97,7 +96,7 @@ public class statTrackLore {
 
     /**
      * Gets the kill stats for a tool.
-     * 
+     *
      * @param tool The tool item stack.
      * @return A map of mob types to killed counts.
      */
@@ -127,7 +126,7 @@ public class statTrackLore {
 
     /**
      * Checks if an item is a mining tool.
-     * 
+     *
      * @param item The tool item.
      * @return true if it's a mining tool.
      */
@@ -138,7 +137,7 @@ public class statTrackLore {
 
     /**
      * Checks if an item is an armor item.
-     * 
+     *
      * @param item The item.
      * @return true if it's armor (has armor stats).
      */
@@ -149,7 +148,7 @@ public class statTrackLore {
 
     /**
      * Checks if an item is an attack tool.
-     * 
+     *
      * @param item The tool item.
      * @return true if it's an attack tool.
      */
@@ -159,140 +158,53 @@ public class statTrackLore {
     }
 
     /**
-     * Handles when a block is broken with a tool that has lore.
+     * Handles when a block is broken with a tool.
      * Tracks mining stats and updates the item's lore.
-     * 
-     * @param blockPos   The position of the broken block.
+     *
+     * @param player     The player calling this
      * @param blockState The state of the broken block.
      * @param tool       The tool used to break the block.
      */
     @SuppressWarnings("null")
-    public static void onBlockBrokenWithLoredTool(BlockPos blockPos, BlockState blockState, ItemStack tool) {
-        if (!hasLore(tool)) {
-            return;
-        }
-
-        String minedKey = getMinedKey(blockState.getBlock());
-
-        // Retrieve or create custom data
-        CustomData nbtComp = tool.get(DataComponents.CUSTOM_DATA);
-        CompoundTag customData = (nbtComp != null) ? nbtComp.copyTag() : new CompoundTag();
-
-        Optional<CompoundTag> optionalStats = customData.getCompound("mining_stats");
-        CompoundTag stats = optionalStats.orElse(new CompoundTag());
-        if (optionalStats.isEmpty()) {
-            customData.put("mining_stats", stats);
-        }
-        int count = stats.getInt(minedKey).orElse(0) + 1;
-        stats.putInt(minedKey, count);
-        customData.put("mining_stats", stats);
-
-        tool.set(DataComponents.CUSTOM_DATA, CustomData.of(customData));
-
-        // Update lore with combined stats
-        updateItemLore(tool);
+    public static void onBlockBrokenWithTool(ServerPlayer player, BlockState blockState, ItemStack tool) {
+        addStat.addBlockMinedStat(player, blockState.getBlock(), tool, 1);
     }
 
     /**
      * Handles when an entity is killed with a tool that has lore.
      * Tracks kill stats and updates the item's lore.
-     * 
+     *
      * @param world  The world where the entity was killed.
      * @param entity The entity killed.
      * @param tool   The tool used to kill the entity.
      */
     @SuppressWarnings("null")
     public static void onEntityKilledWithLoredTool(Level world, LivingEntity entity, ItemStack tool) {
-        if (!hasLore(tool)) {
-            return;
-        }
-
-        String killKey = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).getPath();
-        killKey = killKey.substring(0, 1).toUpperCase() + killKey.substring(1); // capitalize
-
-        // Retrieve or create custom data
-        CustomData nbtComp = tool.get(DataComponents.CUSTOM_DATA);
-        CompoundTag customData = (nbtComp != null) ? nbtComp.copyTag() : new CompoundTag();
-
-        Optional<CompoundTag> optionalStats = customData.getCompound("kill_stats");
-        CompoundTag stats = optionalStats.orElse(new CompoundTag());
-        if (optionalStats.isEmpty()) {
-            customData.put("kill_stats", stats);
-        }
-        int count = stats.getInt(killKey).orElse(0) + 1;
-        stats.putInt(killKey, count);
-        customData.put("kill_stats", stats);
-
-        tool.set(DataComponents.CUSTOM_DATA, CustomData.of(customData));
-
-        // Update lore with combined stats
-        updateItemLore(tool);
+        addStat.addMobKilledStat(null, entity, tool, 1);
     }
 
     /**
      * Handles damage prevented by armor set (unused currently - distributed to
      * pieces).
-     * 
+     *
      * @param player          The player whose armor prevented damage.
      * @param damagePrevented The total damage prevented.
      */
-    public static void onDamagePreventedByArmor(net.minecraft.server.level.ServerPlayer player, float damagePrevented) {
-        ItemLore.LOGGER.info("[statTrackLore] onDamagePreventedByArmor called - damagePrevented: {}", damagePrevented);
-        // This method is called but currently unused since we're distributing to
-        // individual pieces
-        // Could be used for total armor stats if needed
-    }
 
     /**
      * Handles damage prevented by a specific armor piece.
-     * 
+     *
      * @param armorPiece      The armor item stack.
      * @param damagePrevented The damage prevented by this piece.
      */
     @SuppressWarnings("null")
     public static void onArmorPiecePreventedDamage(ItemStack armorPiece, float damagePrevented) {
-        ItemLore.LOGGER.info("[statTrackLore] onArmorPiecePreventedDamage called - item: {}, damagePrevented: {}",
-                armorPiece.getHoverName().getString(), damagePrevented);
-        ItemLore.LOGGER.info("[statTrackLore] Item hasLore: {}", hasLore(armorPiece));
-
-        if (!hasLore(armorPiece)) {
-            ItemLore.LOGGER.info("[statTrackLore] Item has no lore, skipping stat tracking");
-            return;
-        }
-
-        // Retrieve or create custom data
-        CustomData nbtComp = armorPiece.get(DataComponents.CUSTOM_DATA);
-        CompoundTag customData = (nbtComp != null) ? nbtComp.copyTag() : new CompoundTag();
-        ItemLore.LOGGER.info("[statTrackLore] Retrieved custom data: {}", customData != null);
-
-        // Get or create damage prevention stat
-        Optional<CompoundTag> statsOpt = customData.getCompound("armor_stats");
-        CompoundTag stats = statsOpt.orElse(new CompoundTag());
-        if (statsOpt.isEmpty()) {
-            customData.put("armor_stats", stats);
-            ItemLore.LOGGER.info("[statTrackLore] Created new armor_stats compound");
-        }
-
-        float currentPrevention = stats.getFloat("damage_prevented").orElse(0.0f);
-        float newPrevention = currentPrevention + damagePrevented;
-
-        // Round to 1 decimal place for cleaner display
-        newPrevention = Math.round(newPrevention * 10.0f) / 10.0f;
-        stats.putFloat("damage_prevented", newPrevention);
-
-        ItemLore.LOGGER.info("[statTrackLore] Updated damage_prevented from {} to {}", currentPrevention,
-                newPrevention);
-
-        armorPiece.set(DataComponents.CUSTOM_DATA, CustomData.of(customData));
-
-        // Update armor lore
-        updateArmorLore(armorPiece);
-        ItemLore.LOGGER.info("[statTrackLore] Updated armor lore");
+        addStat.addArmorDamagePreventionStat(null, armorPiece, damagePrevented);
     }
 
     /**
      * Gets the armor stats for an armor piece.
-     * 
+     *
      * @param armorPiece The armor item stack.
      * @return A map of armor stats.
      */
@@ -322,11 +234,11 @@ public class statTrackLore {
 
     /**
      * Updates the armor item's lore with damage prevention stats.
-     * 
+     *
      * @param armorPiece The armor item stack.
      */
     @SuppressWarnings("null")
-    private static void updateArmorLore(ItemStack armorPiece) {
+    public static void updateArmorLore(ItemStack armorPiece) {
         net.minecraft.world.item.component.ItemLore existingLore = armorPiece.get(DataComponents.LORE);
         if (existingLore == null)
             return;
@@ -355,23 +267,8 @@ public class statTrackLore {
     }
 
     /**
-     * Gets the key for the block based on its ID path.
-     * Tracks all blocks broken.
-     * 
-     * @param block The block broken.
-     * @return The key for stats.
-     */
-    private static String getMinedKey(Block block) {
-        @SuppressWarnings("null")
-        Identifier id = BuiltInRegistries.BLOCK.getKey(block);
-        String name = id.getPath();
-        // Capitalize the path
-        return name.substring(0, 1).toUpperCase() + name.substring(1);
-    }
-
-    /**
      * Gets the base key for grouping in stats display.
-     * 
+     *
      * @param key The raw key from stats.
      * @return The base key for grouping.
      */
@@ -390,11 +287,11 @@ public class statTrackLore {
      * Shows blocks mined and mobs killed in gray text, or damage prevented for
      * armor.
      * For weapons, also shows the most killed mob type.
-     * 
+     *
      * @param item The item stack.
      */
     @SuppressWarnings("null")
-    private static void updateItemLore(ItemStack item) {
+    public static void updateItemLore(ItemStack item) {
         net.minecraft.world.item.component.ItemLore existingLore = item.get(DataComponents.LORE);
         if (existingLore == null)
             return;

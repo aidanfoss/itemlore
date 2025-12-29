@@ -3,7 +3,7 @@
 	"id": "itemlore",
 	"version": "${version}",
 	"name": "ItemLore",
-	"description": "Adds Date and Time, as well as UID in the NBT Lore tag of anvilled items",
+	"description": "Uses Vanilla components to track stats and information about tools and armor",
 	"authors": [
 		"quantumaidan"
 	],
@@ -12,7 +12,7 @@
 		"sources": "https://github.com/aidanfoss/itemlore"
 	},
 	"license": "MIT License",
-	"icon": "assets/itemlore/icon.png",
+	"icon": "assets/icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"main": [
@@ -24,10 +24,14 @@
 		"server": [],
 		"fabric-datagen": [],
 		"fabric-gametest": [],
-		"preLaunch": []
+		"preLaunch": [],
+		"modmenu": [
+			"net.quantumaidan.itemLore.config.ModMenuIntegration"
+		]
 	},
 	"mixins": [
-		"itemlore.mixins.json"
+		"itemlore.mixins.json",
+		"itemlore.compat.mixins.json"
 	],
 	"custom": {
 		"mixin": {
@@ -37,10 +41,8 @@
 		}
 	},
 	"depends": {
-		"fabricloader": ">=0.16.9",
-		"minecraft": "~1.21.11",
-		"java": ">=21",
-		"fabric-api": "*",
+		"fabricloader": ">=0.16.8",
+		"minecraft": "${minecraft}",
 		"midnightlib": "*"
 	},
 	"suggests": {
