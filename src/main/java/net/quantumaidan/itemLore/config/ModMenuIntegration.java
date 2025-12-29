@@ -1,4 +1,4 @@
-package net.quantumaidan.itemLore.compat;
+package net.quantumaidan.itemLore.config;
 
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;
