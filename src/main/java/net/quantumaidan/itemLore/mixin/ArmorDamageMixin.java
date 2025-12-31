@@ -9,7 +9,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(net.minecraft.server.level.ServerPlayer.class)
-public class ArmorDamageMixin {
+public abstract class ArmorDamageMixin {
+
+    // @org.spongepowered.asm.mixin.Shadow
+    // public abstract boolean isDamageSourceBlocked(DamageSource damageSource);
 
     @Inject(method = "hurtServer", at = @At("HEAD"))
     private void onPlayerDamageApplied(net.minecraft.server.level.ServerLevel world,
@@ -37,6 +40,22 @@ public class ArmorDamageMixin {
 
         boolean isFallDamage = "fall".equals(source.getMsgId());
         boolean bypassesArmor = source.is(net.minecraft.tags.DamageTypeTags.BYPASSES_ARMOR);
+
+        // Check for Fire Resistance vs. Fire/Lava
+        if (source.is(net.minecraft.tags.DamageTypeTags.IS_FIRE)
+                && player.hasEffect(net.minecraft.world.effect.MobEffects.FIRE_RESISTANCE)) {
+            return;
+        }
+
+        // Check for Slow Falling vs. Fall Damage
+        if (isFallDamage && player.hasEffect(net.minecraft.world.effect.MobEffects.SLOW_FALLING)) {
+            return;
+        }
+
+        // Check if damage is blocked by shield
+        // if (this.isDamageSourceBlocked(source)) {
+        // return;
+        // }
 
         if (bypassesArmor && !isFallDamage) {
             return;
