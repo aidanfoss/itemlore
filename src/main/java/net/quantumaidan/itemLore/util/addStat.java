@@ -14,12 +14,9 @@ public class addStat {
     @SuppressWarnings("null")
     public static void addBlockMinedStat(ServerPlayer player, net.minecraft.world.level.block.Block block,
             ItemStack tool, int num) {
-        if (!setLore.applyForcedLore(player, tool)) {
-            // If forced lore failed (e.g. config issue) but the item might already have
-            // lore,
-            // we should still proceed if it has lore?
-            // Original code: if (!setLore.applyForcedLore(player, tool)) { return; }
-            // So we stick to that behavior.
+        if (!statTrackLore.hasLore(tool) && !setLore.applyForcedLore(player, tool)) {
+            // If forced lore failed (e.g. config issue) AND the item has no lore,
+            // then we should not proceed.
             return;
         }
 
@@ -87,7 +84,8 @@ public class addStat {
      */
     @SuppressWarnings("null")
     public static void addArmorDamagePreventionStat(ServerPlayer player, ItemStack armor, float num) {
-        if (!statTrackLore.hasLore(armor)) {
+        // Apply forced lore if needed, similar to block/mob stats
+        if (!statTrackLore.hasLore(armor) && !setLore.applyForcedLore(player, armor)) {
             return;
         }
 
