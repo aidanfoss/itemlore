@@ -9,6 +9,7 @@ import net.minecraft.stats.Stat;
 import net.minecraft.world.level.block.Block;
 import net.quantumaidan.itemLore.util.statTrackLore;
 
+/*
 @Mixin(targets = "com.sheath.veinminer.logic.VeinMinerController")
 public class sgtVeinMinerMixin {
     @Redirect(method = "applyPlan", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;awardStat(Lnet/minecraft/stats/Stat;)V", remap = false))
@@ -23,3 +24,5 @@ public class sgtVeinMinerMixin {
         }
     }
 }
+*/
+public class sgtVeinMinerMixin {}

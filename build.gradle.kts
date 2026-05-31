@@ -1,19 +1,16 @@
 plugins {
-    id("fabric-loom")
+    id("net.fabricmc.fabric-loom") version "1.15.5"
 
     //`maven-publish`
-    id("me.modmuss50.mod-publish-plugin")// version "1.1.0"
+    id("me.modmuss50.mod-publish-plugin") version "1.1.0"
 }
 
-version = "${property("mod.version")}+${stonecutter.current.version}"
+import org.gradle.api.tasks.bundling.Jar
+
+version = "${property("mod.version")}+${property("deps.minecraft")}"
 base.archivesName = property("mod.id") as String
 
-val requiredJava = when {
-    stonecutter.eval(stonecutter.current.version, ">=1.20.6") -> JavaVersion.VERSION_21
-    stonecutter.eval(stonecutter.current.version, ">=1.18") -> JavaVersion.VERSION_17
-    stonecutter.eval(stonecutter.current.version, ">=1.17") -> JavaVersion.VERSION_16
-    else -> JavaVersion.VERSION_1_8
-}
+val requiredJava = JavaVersion.toVersion(25)
 
 repositories {
     /**
@@ -41,17 +38,16 @@ dependencies {
      * @see <a href="https://github.com/FabricMC/fabric">List of Fabric API modules</a>
      */
     fun fapi(vararg modules: String) {
-        for (it in modules) modImplementation(fabricApi.module(it, property("deps.fabric_api") as String))
+        for (it in modules) implementation(fabricApi.module(it, property("deps.fabric_api") as String))
     }
 
-    minecraft("com.mojang:minecraft:${stonecutter.current.version}")
-    mappings(loom.officialMojangMappings())
-    modImplementation("net.fabricmc:fabric-loader:${property("deps.fabric_loader")}")
-    modImplementation("maven.modrinth:midnightlib:${property("deps.midnightlib")}")
-    modImplementation("com.terraformersmc:modmenu:${property("deps.modmenu")}")
-    modImplementation("maven.modrinth:sgtveinminer:${property("deps.sgtveinminer")}")
-    //modImplementation("maven.modrinth:treeharvester:${property("deps.treeharvester")}")
-    modImplementation("net.fabricmc.fabric-api:fabric-api:${property("deps.fabric_api")}")
+    minecraft("com.mojang:minecraft:${property("deps.minecraft")}")
+    implementation("net.fabricmc:fabric-loader:${property("deps.fabric_loader")}")
+    implementation("maven.modrinth:midnightlib:${property("deps.midnightlib")}")
+    implementation("com.terraformersmc:modmenu:${property("deps.modmenu")}")
+    //implementation("maven.modrinth:sgtveinminer:${property("deps.sgtveinminer")}")
+    //implementation("maven.modrinth:treeharvester:${property("deps.treeharvester")}")
+    implementation("net.fabricmc.fabric-api:fabric-api:${property("deps.fabric_api")}")
 
     //fapi("fabric-lifecycle-events-v1", "fabric-resource-loader-v0", "fabric-content-registries-v0", "fabric-gametest-api-v1", "fabric-command-api-v2", "fabric-item-api-v1", "fabric-events-interaction-v0", "fabric-api-base", "fabric-registry-sync-v0")
 
@@ -70,7 +66,7 @@ loom {
     runConfigs.all {
         ideConfigGenerated(true)
         vmArgs("-Dmixin.debug.export=true") // Exports transformed classes for debugging (((THIS IS WHAT CAUSES THE MASSIVE DEBUG SPAM ON BOOT)))
-        runDir = "../../run" // Shares the run directory between versions
+        runDir = "run" // Shares the run directory between versions
     }
 }
 
@@ -86,8 +82,9 @@ fabricApi {
 
 java {
     withSourcesJar()
-    targetCompatibility = requiredJava
-    sourceCompatibility = requiredJava
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    }
 }
 
 tasks {
@@ -113,7 +110,7 @@ tasks {
     // Builds the version into a shared folder in `build/libs/${mod version}/`
     register<Copy>("buildAndCollect") {
         group = "build"
-        from(remapJar.map { it.archiveFile }, remapSourcesJar.map { it.archiveFile })
+        from(project.tasks.named<Jar>("jar").flatMap { it.archiveFile }, project.tasks.named<Jar>("sourcesJar").flatMap { it.archiveFile })
         into(rootProject.layout.buildDirectory.file("libs/${project.property("mod.version")}"))
         dependsOn("build")
     }
@@ -122,8 +119,8 @@ tasks {
 
 // Publishes builds to Modrinth and Curseforge with changelog from the CHANGELOG.md file
 publishMods {
-    file = tasks.remapJar.map { it.archiveFile.get() }
-    additionalFiles.from(tasks.remapSourcesJar.map { it.archiveFile.get() })
+    file = tasks.named<Jar>("jar").flatMap { it.archiveFile }
+    additionalFiles.from(tasks.named<Jar>("sourcesJar").flatMap { it.archiveFile })
     displayName = "${property("mod.name")} ${property("mod.version")} for ${property("mod.mc_title")}"
     version = property("mod.version") as String
     changelog = rootProject.file("CHANGELOG.md").readText()

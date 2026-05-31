@@ -23,7 +23,9 @@ public class CompatMixinPlugin implements IMixinConfigPlugin {
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
         if (mixinClassName.contains("sgtVeinMinerMixin")) {
-            return FabricLoader.getInstance().isModLoaded("veinminermod");
+            // commented out: sgtveinminer does not have 26.1.2 support
+            // return FabricLoader.getInstance().isModLoaded("veinminermod");
+            return false;
         }
         if (mixinClassName.contains("TreeHarvesterMixin")) {
             return FabricLoader.getInstance().isModLoaded("treeharvester");
