@@ -3,7 +3,7 @@ name: Build and Publish
 on:
   pull_request:
     branches:
-      - main
+      - master
   workflow_dispatch:
   push:
     tags:
@@ -26,8 +26,16 @@ jobs:
         id: read_properties
         shell: bash
         run: |
-          # Keys we want to export
-          keys=(minecraft_version yarn_mappings loader_version mod_version maven_group archives_base_name fabric_version modmenu_version)
+          # Map Gradle property keys to stable workflow output names.
+          declare -A property_outputs=(
+            ["deps.minecraft"]="minecraft_version"
+            ["deps.fabric_loader"]="loader_version"
+            ["mod.version"]="mod_version"
+            ["mod.group"]="maven_group"
+            ["mod.id"]="archives_base_name"
+            ["deps.fabric_api"]="fabric_version"
+            ["deps.modmenu"]="modmenu_version"
+          )
 
           # Ensure file exists
           if [ ! -f gradle.properties ]; then
@@ -52,18 +60,15 @@ jobs:
             key="$(echo "$key" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
             val="$(echo "$val" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
 
-            for k in "${keys[@]}"; do
-              if [[ "$key" == "$k" ]]; then
-                # Write output so it becomes steps.read_properties.outputs.<key>
-                echo "${k}=${val}" >> "$GITHUB_OUTPUT"
-              fi
-            done
+            output="${property_outputs[$key]:-}"
+            if [[ -n "$output" ]]; then
+              echo "${output}=${val}" >> "$GITHUB_OUTPUT"
+            fi
           done < gradle.properties
 
       - name: Use extracted properties
         run: |
           echo "minecraft_version: ${{ steps.read_properties.outputs.minecraft_version }}"
-          echo "yarn_mappings: ${{ steps.read_properties.outputs.yarn_mappings }}"
           echo "loader_version: ${{ steps.read_properties.outputs.loader_version }}"
           echo "Mod Version: ${{ steps.read_properties.outputs.mod_version }}"
           echo "maven_group: ${{ steps.read_properties.outputs.maven_group }}"
@@ -75,13 +80,13 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: 21
+          java-version: 25
           
       - name: Confirm Java Version
         run: java -version
 
       - name: Set JAVA_HOME
-        run: echo "JAVA_HOME=${{ env.JAVA_HOME_21_X64 }}" >> $GITHUB_ENV
+        run: echo "JAVA_HOME=${{ env.JAVA_HOME_25_X64 }}" >> $GITHUB_ENV
       
       - name: Make Gradle Wrapper Executable
         if: runner.os != 'Windows'
@@ -110,7 +115,7 @@ jobs:
           changelog-file: CHANGELOG.md
           loaders: fabric
           game-versions: "${{ steps.read_properties.outputs.minecraft_version }}"
-          java: "21"
+          java: "25"
 
       - name: Publish (GitHub)
         uses: Kir-Antipov/mc-publish@v3.3.0
@@ -127,7 +132,7 @@ jobs:
           changelog-file: CHANGELOG.md
           loaders: fabric
           game-versions: "${{ steps.read_properties.outputs.minecraft_version }}"
-          java: "21"
+          java: "25"
 
       - name: Publish (CurseForge)
         uses: Kir-Antipov/mc-publish@v3.3.0
@@ -140,4 +145,4 @@ jobs:
           changelog-file: CHANGELOG.md
           loaders: fabric
           game-versions: "${{ steps.read_properties.outputs.minecraft_version }}"
-          java: "21"
+          java: "25"
