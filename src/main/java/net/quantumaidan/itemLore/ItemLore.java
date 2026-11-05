@@ -215,13 +215,13 @@ public class ItemLore implements ModInitializer {
         }
         ItemStack tool = player.getMainHandItem();
         if (tool.isEmpty() || !statTrackLore.hasLore(tool)) {
-            player.displayClientMessage(Component.literal("You must be holding a tool with lore."), false);
+            context.getSource().sendSystemMessage(Component.literal("You must be holding a tool with lore."));
             return 1;
         }
         Map<String, Integer> miningStats = statTrackLore.getMiningStats(tool);
         Map<String, Integer> killStats = statTrackLore.getKillStats(tool);
         if (miningStats.isEmpty() && killStats.isEmpty()) {
-            player.displayClientMessage(Component.literal("No stats found."), false);
+            context.getSource().sendSystemMessage(Component.literal("No stats found."));
             return 0;
         }
 
@@ -259,13 +259,13 @@ public class ItemLore implements ModInitializer {
                 totalText = "Total Blocks: " + total;
             } else if (statTrackLore.isAttackTool(tool.getItem())) {
                 total = killStats.values().stream().mapToInt(Integer::intValue).sum();
-                player.displayClientMessage(Component.literal("=== Combat Stats ===").withStyle(ChatFormatting.GOLD),
-                        false);
-                player.displayClientMessage(Component.literal("Total Kills: " + total).withStyle(ChatFormatting.AQUA),
-                        false);
+                context.getSource()
+                        .sendSystemMessage(Component.literal("=== Combat Stats ===").withStyle(ChatFormatting.GOLD));
+                context.getSource()
+                        .sendSystemMessage(Component.literal("Total Kills: " + total).withStyle(ChatFormatting.AQUA));
                 return 1;
             } else {
-                player.displayClientMessage(Component.literal("No specific stats to show."), false);
+                context.getSource().sendSystemMessage(Component.literal("No specific stats to show."));
                 return 0;
             }
         }
@@ -273,49 +273,49 @@ public class ItemLore implements ModInitializer {
         if (mode == StatMode.ALL) {
             // Display blocks and mobs separately
             if (!miningStats.isEmpty()) {
-                player.displayClientMessage(Component.literal("=== Block Stats ===").withStyle(ChatFormatting.GOLD),
-                        false);
+                context.getSource()
+                        .sendSystemMessage(Component.literal("=== Block Stats ===").withStyle(ChatFormatting.GOLD));
                 List<String> keys = new ArrayList<>(miningStats.keySet());
                 keys.sort(String.CASE_INSENSITIVE_ORDER);
                 for (String key : keys) {
                     int count = miningStats.get(key);
-                    player.displayClientMessage(
-                            Component.literal(formatName(key) + ": " + count).withStyle(ChatFormatting.AQUA), false);
+                    context.getSource().sendSystemMessage(
+                            Component.literal(formatName(key) + ": " + count).withStyle(ChatFormatting.AQUA));
                 }
                 int totalBlocks = miningStats.values().stream().mapToInt(Integer::intValue).sum();
-                player.displayClientMessage(
-                        Component.literal("Total Blocks: " + totalBlocks).withStyle(ChatFormatting.YELLOW), false);
+                context.getSource().sendSystemMessage(
+                        Component.literal("Total Blocks: " + totalBlocks).withStyle(ChatFormatting.YELLOW));
             }
             if (!killStats.isEmpty()) {
-                player.displayClientMessage(Component.literal("=== Mob Stats ===").withStyle(ChatFormatting.GOLD),
-                        false);
+                context.getSource()
+                        .sendSystemMessage(Component.literal("=== Mob Stats ===").withStyle(ChatFormatting.GOLD));
                 List<String> keys = new ArrayList<>(killStats.keySet());
                 keys.sort(String.CASE_INSENSITIVE_ORDER);
                 for (String key : keys) {
                     int count = killStats.get(key);
-                    player.displayClientMessage(
-                            Component.literal(formatName(key) + ": " + count).withStyle(ChatFormatting.AQUA), false);
+                    context.getSource().sendSystemMessage(
+                            Component.literal(formatName(key) + ": " + count).withStyle(ChatFormatting.AQUA));
                 }
                 int totalMobs = killStats.values().stream().mapToInt(Integer::intValue).sum();
-                player.displayClientMessage(
-                        Component.literal("Total Kills: " + totalMobs).withStyle(ChatFormatting.YELLOW), false);
+                context.getSource().sendSystemMessage(
+                        Component.literal("Total Kills: " + totalMobs).withStyle(ChatFormatting.YELLOW));
             }
             if (!miningStats.isEmpty() || !killStats.isEmpty()) {
                 int totalActions = miningStats.values().stream().mapToInt(Integer::intValue).sum()
                         + killStats.values().stream().mapToInt(Integer::intValue).sum();
-                player.displayClientMessage(
-                        Component.literal("Total Actions: " + totalActions).withStyle(ChatFormatting.YELLOW), false);
+                context.getSource().sendSystemMessage(
+                        Component.literal("Total Actions: " + totalActions).withStyle(ChatFormatting.YELLOW));
             }
         } else {
             List<String> keys = new ArrayList<>(displayStats.keySet());
             keys.sort(String.CASE_INSENSITIVE_ORDER);
-            player.displayClientMessage(Component.literal(header).withStyle(ChatFormatting.GOLD), false);
+            context.getSource().sendSystemMessage(Component.literal(header).withStyle(ChatFormatting.GOLD));
             for (String key : keys) {
                 int count = displayStats.get(key);
-                player.displayClientMessage(
-                        Component.literal(formatName(key) + ": " + count).withStyle(ChatFormatting.AQUA), false);
+                context.getSource().sendSystemMessage(
+                        Component.literal(formatName(key) + ": " + count).withStyle(ChatFormatting.AQUA));
             }
-            player.displayClientMessage(Component.literal(totalText).withStyle(ChatFormatting.YELLOW), false);
+            context.getSource().sendSystemMessage(Component.literal(totalText).withStyle(ChatFormatting.YELLOW));
         }
         return 1;
     }

@@ -5,7 +5,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -109,11 +109,11 @@ public class ItemLoreTest {
         net.quantumaidan.itemLore.util.setLore.applyNewLore(player, swordStack);
 
         // Spawn 3 chickens with 1 HP at the same location
-        LivingEntity chicken1 = context.spawn(EntityType.CHICKEN, chickenPos);
+        LivingEntity chicken1 = context.spawn(EntityTypes.CHICKEN, chickenPos);
         chicken1.setHealth(1.0f);
-        LivingEntity chicken2 = context.spawn(EntityType.CHICKEN, chickenPos);
+        LivingEntity chicken2 = context.spawn(EntityTypes.CHICKEN, chickenPos);
         chicken2.setHealth(1.0f);
-        LivingEntity chicken3 = context.spawn(EntityType.CHICKEN, chickenPos);
+        LivingEntity chicken3 = context.spawn(EntityTypes.CHICKEN, chickenPos);
         chicken3.setHealth(1.0f);
 
         // Wait for cooldown to recharge (ensure sweeping attack works)
